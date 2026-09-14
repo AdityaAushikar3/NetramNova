@@ -1,0 +1,141 @@
+{
+  "grade_1_raw_sensitivity": 0.0,
+  "grade_1_patch_audited_sensitivity": 0.7667,
+  "grade_1_sensitivity_gain_pct": 76.67,
+  "grade_1_raw_f1": 0.0,
+  "grade_1_patch_audited_f1": 0.4259,
+  "grade_0_specificity_maintained": 0.995,
+  "total_rescued_early_patients": 78,
+  "case_examples": [
+    {
+      "patient_idx": 2,
+      "true_grade": 2,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 19 sub-pixel microaneurysm(s) (conf=0.95) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 19,
+        "mean_confidence": 0.9452,
+        "max_lesion_diameter_px": 57.93,
+        "has_isolated_ma_only": false
+      }
+    },
+    {
+      "patient_idx": 8,
+      "true_grade": 2,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 16 sub-pixel microaneurysm(s) (conf=0.97) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 16,
+        "mean_confidence": 0.972,
+        "max_lesion_diameter_px": 25.04,
+        "has_isolated_ma_only": false
+      }
+    },
+    {
+      "patient_idx": 10,
+      "true_grade": 1,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 2 sub-pixel microaneurysm(s) (conf=0.82) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 2,
+        "mean_confidence": 0.8164,
+        "max_lesion_diameter_px": 20.64,
+        "has_isolated_ma_only": true
+      }
+    },
+    {
+      "patient_idx": 20,
+      "true_grade": 4,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 13 sub-pixel microaneurysm(s) (conf=0.86) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 13,
+        "mean_confidence": 0.8585,
+        "max_lesion_diameter_px": 77.19,
+        "has_isolated_ma_only": false
+      }
+    },
+    {
+      "patient_idx": 31,
+      "true_grade": 2,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 22 sub-pixel microaneurysm(s) (conf=0.95) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 22,
+        "mean_confidence": 0.9508,
+        "max_lesion_diameter_px": 76.67,
+        "has_isolated_ma_only": false
+      }
+    },
+    {
+      "patient_idx": 33,
+      "true_grade": 2,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 18 sub-pixel microaneurysm(s) (conf=0.94) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 18,
+        "mean_confidence": 0.9445,
+        "max_lesion_diameter_px": 42.96,
+        "has_isolated_ma_only": false
+      }
+    },
+    {
+      "patient_idx": 34,
+      "true_grade": 2,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 18 sub-pixel microaneurysm(s) (conf=0.88) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 18,
+        "mean_confidence": 0.8755,
+        "max_lesion_diameter_px": 27.49,
+        "has_isolated_ma_only": false
+      }
+    },
+    {
+      "patient_idx": 43,
+      "true_grade": 2,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 5 sub-pixel microaneurysm(s) (conf=0.93) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 5,
+        "mean_confidence": 0.9288,
+        "max_lesion_diameter_px": 75.95,
+        "has_isolated_ma_only": false
+      }
+    },
+    {
+      "patient_idx": 44,
+      "true_grade": 2,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 13 sub-pixel microaneurysm(s) (conf=0.97) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 13,
+        "mean_confidence": 0.9689,
+        "max_lesion_diameter_px": 71.75,
+        "has_isolated_ma_only": false
+      }
+    },
+    {
+      "patient_idx": 47,
+      "true_grade": 2,
+      "raw_prediction": 0,
+      "audited_prediction": 1,
+      "reason": "UPGRADED (0 -> 1): Rescued 9 sub-pixel microaneurysm(s) (conf=0.94) missed by 512x512 downsampling",
+      "ma_details": {
+        "ma_count": 9,
+        "mean_confidence": 0.9448,
+        "max_lesion_diameter_px": 60.07,
+        "has_isolated_ma_only": false
+      }
+    }
+  ]
+}

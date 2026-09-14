@@ -1,0 +1,111 @@
+# NetramNova ML Pipeline — Central Configuration
+# All paths, hyperparameters, and dataset settings are defined here.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DATASET PATHS  (edit to match your local storage)
+# ─────────────────────────────────────────────────────────────────────────────
+datasets:
+  aptos:
+    root: "data/aptos2019"
+    train_csv: "data/aptos2019/train.csv"
+    test_csv:  "data/aptos2019/test.csv"
+    image_dir: "data/aptos2019/train_images"
+    test_image_dir: "data/aptos2019/test_images"
+
+  idrid:
+    root: "data/IDRiD"
+    grading_train_csv: "data/IDRiD/B. Disease Grading/2. Groundtruths/a. IDRiD_Disease Grading_Training Labels.csv"
+    grading_test_csv:  "data/IDRiD/B. Disease Grading/2. Groundtruths/b. IDRiD_Disease Grading_Testing Labels.csv"
+    image_train_dir:   "data/IDRiD/B. Disease Grading/1. Original Images/a. Training Set"
+    image_test_dir:    "data/IDRiD/B. Disease Grading/1. Original Images/b. Testing Set"
+    seg_train_dir:     "data/IDRiD/A. Segmentation/1. Original Images/a. Training Set"
+    seg_mask_dir:      "data/IDRiD/A. Segmentation/2. All Segmentation Groundtruths/a. Training Set"
+    # Sub-directories: 1. Microaneurysms, 2. Haemorrhages, 3. Hard Exudates,
+    # 4. Soft Exudates (CWS), 5. Optic Disc
+    optic_disc_dir:    "data/IDRiD/C. Optic Disc Center Location/1. Groundtruths"
+
+  eyepacs:
+    root: "data/eyepacs"
+    train_csv:  "data/eyepacs/trainLabels.csv"
+    image_dir:  "data/eyepacs/train"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUT / CHECKPOINT DIRECTORIES
+# ─────────────────────────────────────────────────────────────────────────────
+output:
+  checkpoints: "outputs/checkpoints"
+  logs:        "outputs/logs"
+  onnx:        "outputs/onnx"
+  gradcam:     "outputs/gradcam"
+  eval:        "outputs/eval"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PREPROCESSING
+# ─────────────────────────────────────────────────────────────────────────────
+preprocessing:
+  image_size: 512        # resize target (H x W)
+  clahe_clip_limit: 0.01 # mild CLAHE to avoid over-enhancement
+  clahe_tile_grid: 8
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DR CLASSIFIER (EfficientNet-B2)
+# ─────────────────────────────────────────────────────────────────────────────
+classifier:
+  arch: "tf_efficientnet_b2"   # timm model name
+  num_classes: 5               # ICDR Grades 0, 1, 2, 3, 4
+  pretrained: true
+  image_size: 512
+  # Training
+  epochs: 40
+  batch_size: 4                # Safe for 4GB VRAM on RTX 3050 Laptop GPU
+  gradient_accumulation_steps: 2 # Effective batch size = 8
+  learning_rate: 3.0e-4
+  weight_decay: 1.0e-4
+  scheduler: "cosine"          # cosine annealing with warm restarts
+  warmup_epochs: 3
+  mixed_precision: true        # torch.cuda.amp
+  label_smoothing: 0.05
+  dropout: 0.3
+  loss_type: "focal"
+  focal_gamma: 2.0
+  # Class weights (inverse frequency) — computed dynamically from train split
+  use_class_weights: true
+  # Augmentation
+  augment_train: true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEGMENTATION (YOLOv8-Seg)
+# ─────────────────────────────────────────────────────────────────────────────
+segmentation:
+  model: "yolov8m-seg.pt"
+  epochs: 50
+  imgsz: 640
+  batch_size: 8
+  lr: 0.001
+  workers: 4
+  # ICDR lesion class mapping
+  classes:
+    0: "Microaneurysm"
+    1: "Haemorrhage"
+    2: "Hard Exudate"
+    3: "Soft Exudate (CWS)"
+    4: "Optic Disc"
+  data_yaml: "datasets/idrid_yolo/idrid_seg.yaml"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OD / FOVEA LOCALIZATION
+# ─────────────────────────────────────────────────────────────────────────────
+localization:
+  arch: "tf_efficientnet_b0"
+  epochs: 30
+  batch_size: 16
+  learning_rate: 2.0e-4
+  image_size: 512
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ONNX EXPORT
+# ─────────────────────────────────────────────────────────────────────────────
+export:
+  opset: 17
+  dynamic_axes: true
+  quantize_int8: false   # set true for INT8 quantization (CPU speedup)

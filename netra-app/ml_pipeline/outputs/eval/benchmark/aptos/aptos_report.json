@@ -1,0 +1,66 @@
+{
+  "sensitivity": 0.8029,
+  "specificity": 0.9694,
+  "ppv": 0.9402,
+  "npv": 0.8916,
+  "f1_referable": 0.8661,
+  "accuracy": 0.9071,
+  "auc_macro": 0.8767,
+  "auc_per_class": {
+    "No DR": 0.9943,
+    "Mild NPDR": 0.9118,
+    "Moderate NPDR": 0.9296,
+    "Severe NPDR": 0.6689,
+    "PDR": 0.8791
+  },
+  "kappa_quadratic": 0.8704,
+  "tp": 110,
+  "tn": 222,
+  "fp": 7,
+  "fn": 27,
+  "n_total": 366,
+  "confusion_matrix": [
+    [
+      195,
+      3,
+      1,
+      0,
+      0
+    ],
+    [
+      2,
+      22,
+      5,
+      0,
+      1
+    ],
+    [
+      2,
+      21,
+      59,
+      5,
+      0
+    ],
+    [
+      0,
+      0,
+      11,
+      5,
+      1
+    ],
+    [
+      0,
+      4,
+      9,
+      7,
+      13
+    ]
+  ],
+  "confusion_matrix_labels": [
+    "No DR",
+    "Mild NPDR",
+    "Moderate NPDR",
+    "Severe NPDR",
+    "PDR"
+  ]
+}

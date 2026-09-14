@@ -1,0 +1,306 @@
+[
+  {
+    "id": "TC001",
+    "title": "Start a new chat session and receive the first AI follow-up via Enter submit",
+    "description": "Verifies that a first-time visitor can load the chat, submit an answer with Enter, see a loading state, and receive an AI follow-up in the same thread.",
+    "category": "AI Chat Interface",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the chat interface to be ready"
+      },
+      {
+        "type": "action",
+        "description": "Fill a free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the loading state to appear"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a new AI message is displayed after the user message"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Submit an answer via Send button and continue a 3-turn conversation in one session",
+    "description": "Verifies that a user can submit via the Send control and continue the conversation for at least three turns without losing prior messages.",
+    "category": "AI Chat Interface",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the chat interface to be ready"
+      },
+      {
+        "type": "action",
+        "description": "Fill a free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Click the send control"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the AI response to appear"
+      },
+      {
+        "type": "action",
+        "description": "Fill a second free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the AI response to appear"
+      },
+      {
+        "type": "action",
+        "description": "Fill a third free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Click the send control"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify multiple turns of user and AI messages are present in a single continuous thread"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Loading state appears while awaiting an AI response and clears afterward",
+    "description": "Verifies that after submitting an answer the UI shows a waiting/loading indicator and then returns to a normal state once the AI message is rendered.",
+    "category": "AI Chat Interface",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the chat interface to be ready"
+      },
+      {
+        "type": "action",
+        "description": "Fill a free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the loading state to appear"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the loading state is no longer shown after the AI response is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Refinement loop updates the AI follow-up after the user changes their answer",
+    "description": "Verifies that after an AI follow-up, the user can refine their answer and the AI provides an updated follow-up in the same conversation.",
+    "category": "AI Chat Interface",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the chat interface to be ready"
+      },
+      {
+        "type": "action",
+        "description": "Fill a free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the AI response to appear"
+      },
+      {
+        "type": "action",
+        "description": "Fill a refined answer that changes key details into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a new AI follow-up message is displayed after the refined answer"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Pressing Enter sends exactly one message and does not double-submit",
+    "description": "Verifies that using Enter to submit results in a single user message and a single AI response rather than duplicated turns.",
+    "category": "AI Chat Interface",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the chat interface to be ready"
+      },
+      {
+        "type": "action",
+        "description": "Fill a free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the AI response to appear"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the latest user turn appears only once and the latest AI reply appears only once"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Message order remains correct with user message followed by AI response",
+    "description": "Verifies that after sending an answer, the UI orders messages correctly with the user message appearing before the corresponding AI reply.",
+    "category": "AI Chat Interface",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the chat interface to be ready"
+      },
+      {
+        "type": "action",
+        "description": "Fill a free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Click the send control"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the AI response to appear"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the most recent user message appears immediately before the most recent AI message in the thread"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Chat scrolls to keep the latest message visible after multiple turns",
+    "description": "Verifies that after several turns, the conversation view keeps the newest messages visible without manual scrolling.",
+    "category": "AI Chat Interface",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the chat interface to be ready"
+      },
+      {
+        "type": "action",
+        "description": "Fill a free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the AI response to appear"
+      },
+      {
+        "type": "action",
+        "description": "Fill a second free-text answer into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the AI response to appear"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the latest AI message is visible in the conversation viewport"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC008",
+    "title": "Prevent whitespace-only messages from being submitted",
+    "description": "Verifies that submitting an empty or whitespace-only answer is blocked and no new user message is added to the thread.",
+    "category": "AI Chat Interface",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the chat interface to be ready"
+      },
+      {
+        "type": "action",
+        "description": "Fill whitespace-only text into the chat input field"
+      },
+      {
+        "type": "action",
+        "description": "Press Enter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no new user message is added to the message list"
+      }
+    ],
+    "priority": "Low"
+  }
+]

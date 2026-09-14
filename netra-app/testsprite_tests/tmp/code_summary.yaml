@@ -1,0 +1,32 @@
+version: "2"
+type: frontend
+tech_stack:
+  - typescript
+  - next.js
+  - react
+  - tailwindcss
+  - framer-motion
+  - lucide-react
+  - ai-sdk
+routes:
+  - path: /
+    file: src/app/page.tsx
+    auth_required: false
+    description: Adaptive Survey AI Chat Interface
+features:
+  - name: AI Chat Interface
+    description: Conversational interface for the adaptive survey AI
+    files:
+      - src/app/page.tsx
+      - src/app/api/chat/route.ts
+    entry_route: /
+    user_interactions:
+      - Read AI messages
+      - Type answer in input field
+      - Click send button or press enter to submit
+      - See loading state while waiting for AI response
+    api_calls:
+      - method: POST
+        endpoint: /api/chat
+    auth_required: false
+known_limitations: []

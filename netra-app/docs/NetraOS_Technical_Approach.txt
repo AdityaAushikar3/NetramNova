@@ -1,0 +1,127 @@
+================================================================================
+NetraOS: Detailed Technical Approach & Engineering Architecture
+System Modules, Algorithms, Data Pipelines & Simulation Logic
+================================================================================
+
+1. MODULE 1: DATA INGESTION, CAMERA-INVARIANT TRAINING & PREPROCESSING (EDGE-LOCAL)
+--------------------------------------------------------------------------------
+• Purpose: Standardizes images captured across diverse fundus cameras (Forus 3nethra,
+  Remidio Fundus-on-Phone, Topcon 3CCD, Zeiss, Volk Smartphone Adapters).
+• Local Edge Execution: Preprocessing and Quality Assessment run ON-DEVICE / EDGE at the rural PHC
+  in < 1.5 seconds with ZERO internet dependency.
+
+• Camera-Invariant AI Training (Domain Generalization):
+  - During offline training, the AI model is fed multi-camera datasets (APTOS 2019, Messidor-2, EyePACS).
+  - Uses Domain Adversarial Training / Feature Alignment so the neural network explicitly learns to extract
+    RETINAL LESIONS (disease), ignoring camera-specific color tint, contrast differences, and sensor styles.
+
+• Multi-Factor Image Quality Assessment (IQA Gate):
+  Before passing to the AI, a 3-factor quality check evaluates whether the photo is usable:
+  1. Focus/Blur Check: Laplacian Variance thresholding (Var < 12 => Blurry).
+  2. Exposure Check: Mean luminance of green channel (20 <= Lum <= 235 => Well-exposed).
+  3. Field-of-View (FOV) Visibility Check: Binarization + morphological fill to verify >=35% retinal coverage.
+  - If Quality Check FAILS -> System alerts worker with specific recapture feedback ("Photo too dark", "Retina cut off").
+
+• Sequential Preprocessing Algorithm Steps in MATLAB:
+  1. Foracchia et al. (2005) Global Illumination Normalization: Models and subtracts low-frequency illumination shading drift.
+  2. Mild CLAHE Refinement Pass (ClipLimit = 0.01): Boosts local micro-contrast for faint 3-pixel microaneurysms.
+  3. Dual-Output Data Flow Pipeline:
+     - Output (a): `normalizedGray` (Single-channel Green Foracchia + Mild CLAHE) -> Feeds Vessel, MA, and Hemorrhage segmentation.
+     - Output (b): `illuminationCorrectedRGB` (Per-channel RGB Foracchia correction) -> Preserves true color for L*a*b* Exudates.
+
+• MATLAB Code Implementation:
+  ```matlab
+  function [normalizedGray, illuminationCorrectedRGB] = sequentialForacchiaClahe(img)
+      % Output (a): Green channel Foracchia + Mild CLAHE (feeds vessel/MA/hemorrhage detection)
+      greenCh = double(img(:,:,2));
+      bgEstimate = imopen(greenCh, strel('disk', 30));
+      bgSmooth = imgaussfilt(bgEstimate, 15);
+      flattenedGreen = uint8(max(0, min(255, (greenCh - bgSmooth) + 128.0)));
+      normalizedGray = adapthisteq(flattenedGreen, 'ClipLimit', 0.01, 'NumTiles', [8 8]);
+
+      % Output (b): Per-channel Foracchia correction preserving RGB color
+      % (Preserved for Lab-space Exudate detection in Module 2, Lesion 3)
+      imgD = double(img);
+      illuminationCorrectedRGB = zeros(size(imgD), 'uint8');
+      for c = 1:3
+          chBg = imgaussfilt(imopen(imgD(:,:,c), strel('disk', 30)), 15);
+          illuminationCorrectedRGB(:,:,c) = uint8(max(0, min(255, (imgD(:,:,c) - chBg) + 128.0)));
+      end
+  end
+  ```
+
+
+2. MODULE 2: RETINAL STRUCTURE & LESION SEGMENTATION (MATLAB TOOLBOXES)
+--------------------------------------------------------------------------------
+Built using MATLAB Image Processing, Computer Vision, and Medical Imaging Toolboxes:
+
+• Structure 1: Optic Disc & Fovea Localization
+  - Method: Gaussian Blur -> Circular Hough Transform + Peak Intensity Detection.
+  - Purpose: Locate and mask out optic disc bright tissue so it isn't misidentified as exudates.
+
+• Structure 2: Blood Vessel Tree Segmentation
+  - Method: Multi-Scale Gabor Filter + Frangi Vesselness Filter (Hessian-based tubular structure enhancement on `normalizedGray`).
+  - Purpose: Extracts linear vessel branches via eigenvalue analysis of Hessian matrix; helps identify venous beading and IRMA.
+
+• Lesion 1: Microaneurysms (MAs) Detection
+  - Method: Bottom-Hat Filtering (`imbothat`) on `normalizedGray` non-vessel areas -> Candidate blob extraction
+    -> Morphological area (2-20 pixels) and eccentricity filtering.
+  - Purpose: Detects earliest clinical sign of DR.
+
+• Lesion 2: Hemorrhage Classification
+  - Method: Morphological area filtering on dark irregular blood patches on `normalizedGray`.
+  - Purpose: Measures bleeding area across retinal quadrants (ICDR 4-2-1 rule).
+
+• Lesion 3: Hard Exudates Segmentation
+  - Method: Top-Hat morphological filtering (`imtophat`) + Brightness thresholding in L*a*b* space
+    on `illuminationCorrectedRGB` (B*-channel highlights yellow deposits).
+  - Purpose: Isolates bright fatty fluid deposits leaking from damaged capillaries using true color information.
+
+
+3. MODULE 3: DEEP LEARNING CLASSIFIER & 3-TIER UNCERTAINTY ENGINE (EDGE INFERENCE)
+--------------------------------------------------------------------------------
+• Edge-Local Deployment & Latency Budget: The Quantized Neural Model (ONNX INT8 / TensorRT / MATLAB Coder) runs
+  LOCAL ON-DEVICE at the PHC. Total end-to-end edge triage latency (preprocessing + neural inference) is < 2.0 seconds
+  end-to-end (where preprocessing accounts for < 1.5s and neural inference accounts for < 0.5s).
+
+• 3-Tier Uncertainty-Calibrated Triage Logic:
+  Model computes calibrated softmax probabilities P(class|x):
+  - Tier 1 (High Confidence, P >= 0.90): Auto-cleared (Normal) or Fast-track Referral.
+    PROCESSED 100% OFFLINE AT PHC EDGE (<2.0s total delay, 0 network bandwidth). ~74% of patients receive immediate results.
+  - Tier 2 (Borderline / Low Confidence, 0.70 <= P < 0.90): Flagged for PRIORITY Doctor Queue.
+    Asynchronously uploaded to district hub for doctor verification.
+  - Tier 3 (Out-of-Distribution / Blurry, P < 0.70 or Laplacian Blur Var < 12): Safely rejected and
+    routed to retina specialist with immediate local field recapture alert.
+
+• Explainability (Grad-CAM):
+  Computes gradient of target class score w.r.t feature maps of last convolutional layer. Overlays
+  a red-to-yellow heatmap on the fundus photo showing doctors the exact lesion regions driving decision.
+
+
+4. MODULE 4: 12-MONTH LONGITUDINAL PROGRESSION RISK ESTIMATOR
+--------------------------------------------------------------------------------
+• Mathematical Formulation:
+  Progression Risk Score = w1 * (MA Count) + w2 * (Hemorrhage Count) + w3 * (Exudate Area)
+  Calculates 12-month risk of progressing to vision-threatening DR.
+
+• Recall Interval Mapping:
+  - Risk Score < 30%  --> 12-Month Standard Annual Recall
+  - 30% <= Risk <= 65% --> 6-Month Close Monitoring
+  - Risk Score > 65%  --> 3-Month Urgent Follow-Up
+
+
+5. MODULE 5: SIMULINK DISTRICT RESOURCE OPTIMIZER (HYBRID EDGE-CLOUD QUEUE)
+--------------------------------------------------------------------------------
+• Target User: District Health Officer (DHO) overseeing 100,000 screenings across 50 rural PHCs.
+• Hybrid Edge-Telemedicine SimEvents Model:
+  1. Edge Local Processing (PHC): 100% of images undergo instant offline IQA and Tier-1 AI Triage (<2.0s end-to-end).
+     ~74% of patients receive instant auto-clear results with 0kbps network bandwidth usage.
+  2. Asynchronous Upload Queue (2G/3G Cellular @ 256 kbps): Applies ONLY to the ~26% of cases
+     requiring human review (Tiers 2 & 3). Reduces total district network bandwidth consumption by 74%.
+  3. Doctor Review Queue (District Hub): Models district hub ophthalmologists reviewing prioritized
+     cases at 22 seconds per review.
+
+• Resource Optimization Engine:
+  Solves for minimum required doctors N and optimal camera allocation across 50 PHCs (given a budget of
+  15 portable cameras and 3 doctors) to guarantee average queue wait time < 30 seconds with ZERO backlog.
+================================================================================

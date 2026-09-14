@@ -1,0 +1,96 @@
+{
+  "grade_3_raw_sensitivity": 0.0588,
+  "grade_3_etdrs_audited_sensitivity": 0.2353,
+  "grade_3_specificity": 0.9971,
+  "total_rescued_patients": 4,
+  "audit_case_examples": [
+    {
+      "patient_idx": 51,
+      "true_grade": 4,
+      "raw_prediction": 2,
+      "audited_prediction": 3,
+      "reason": "UPGRADED: ETDRS Rule 4 Verified (>=20 Hemorrhages + Microaneurysms in all 4 quadrants)",
+      "quadrant_counts": {
+        "superior_hemorrhages": 44,
+        "inferior_hemorrhages": 34,
+        "nasal_hemorrhages": 28,
+        "temporal_hemorrhages": 27,
+        "superior_ma": 21,
+        "inferior_ma": 17,
+        "nasal_ma": 17,
+        "temporal_ma": 25,
+        "superior_total_hma": 65,
+        "inferior_total_hma": 51,
+        "nasal_total_hma": 45,
+        "temporal_total_hma": 52,
+        "meets_etdrs_rule_4": true
+      }
+    },
+    {
+      "patient_idx": 251,
+      "true_grade": 3,
+      "raw_prediction": 2,
+      "audited_prediction": 3,
+      "reason": "UPGRADED: ETDRS Rule 4 Verified (>=20 Hemorrhages + Microaneurysms in all 4 quadrants)",
+      "quadrant_counts": {
+        "superior_hemorrhages": 18,
+        "inferior_hemorrhages": 23,
+        "nasal_hemorrhages": 18,
+        "temporal_hemorrhages": 31,
+        "superior_ma": 14,
+        "inferior_ma": 13,
+        "nasal_ma": 8,
+        "temporal_ma": 11,
+        "superior_total_hma": 32,
+        "inferior_total_hma": 36,
+        "nasal_total_hma": 26,
+        "temporal_total_hma": 42,
+        "meets_etdrs_rule_4": true
+      }
+    },
+    {
+      "patient_idx": 277,
+      "true_grade": 3,
+      "raw_prediction": 2,
+      "audited_prediction": 3,
+      "reason": "UPGRADED: ETDRS Rule 4 Verified (>=20 Hemorrhages + Microaneurysms in all 4 quadrants)",
+      "quadrant_counts": {
+        "superior_hemorrhages": 20,
+        "inferior_hemorrhages": 26,
+        "nasal_hemorrhages": 18,
+        "temporal_hemorrhages": 29,
+        "superior_ma": 10,
+        "inferior_ma": 8,
+        "nasal_ma": 11,
+        "temporal_ma": 14,
+        "superior_total_hma": 30,
+        "inferior_total_hma": 34,
+        "nasal_total_hma": 29,
+        "temporal_total_hma": 43,
+        "meets_etdrs_rule_4": true
+      }
+    },
+    {
+      "patient_idx": 339,
+      "true_grade": 3,
+      "raw_prediction": 2,
+      "audited_prediction": 3,
+      "reason": "UPGRADED: ETDRS Rule 4 Verified (>=20 Hemorrhages + Microaneurysms in all 4 quadrants)",
+      "quadrant_counts": {
+        "superior_hemorrhages": 20,
+        "inferior_hemorrhages": 18,
+        "nasal_hemorrhages": 17,
+        "temporal_hemorrhages": 27,
+        "superior_ma": 15,
+        "inferior_ma": 11,
+        "nasal_ma": 10,
+        "temporal_ma": 17,
+        "superior_total_hma": 35,
+        "inferior_total_hma": 29,
+        "nasal_total_hma": 27,
+        "temporal_total_hma": 44,
+        "meets_etdrs_rule_4": true
+      }
+    }
+  ]
+}

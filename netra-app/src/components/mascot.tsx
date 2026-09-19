@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion';
-
 export default function Mascot() {
   return (
     <div className="flex flex-col items-center justify-center p-2 relative h-48 w-48 mx-auto">

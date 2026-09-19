@@ -42,6 +42,7 @@ export default function CreatorDashboard() {
   // Load surveys on mount
   useEffect(() => {
     fetchSurveys();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch sessions when selected survey changes
@@ -49,9 +50,10 @@ export default function CreatorDashboard() {
     if (selectedSurveyId) {
       fetchSessions(selectedSurveyId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSurveyId]);
 
-  const fetchSurveys = async () => {
+  async function fetchSurveys() {
     try {
       const res = await fetch('/api/survey/list');
       const data = await res.json();
@@ -64,9 +66,9 @@ export default function CreatorDashboard() {
     } catch (e) {
       console.error("Error loading surveys:", e);
     }
-  };
+  }
 
-  const fetchSessions = async (surveyId: string) => {
+  async function fetchSessions(surveyId: string) {
     setIsLoadingAnalytics(true);
     try {
       const res = await fetch(`/api/survey/list?surveyId=${surveyId}`);
@@ -79,7 +81,7 @@ export default function CreatorDashboard() {
     } finally {
       setIsLoadingAnalytics(false);
     }
-  };
+  }
 
   const handleCreateSurvey = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +104,7 @@ export default function CreatorDashboard() {
       } else {
         setError(data.error || "Failed to generate survey blueprint.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Generation failed:", err);
       setError("Connection failure. Please verify your Vercel deployment logs.");
     } finally {
@@ -297,7 +299,7 @@ export default function CreatorDashboard() {
 
                     <div className="p-3 bg-tertiary/10 border border-tertiary/20 rounded-xl">
                       <div className="text-xs font-semibold text-tertiary">AI Interviewer Persona</div>
-                      <div className="text-sm text-on_surface_variant mt-1 italic">"{generatedSurvey.persona}"</div>
+                      <div className="text-sm text-on_surface_variant mt-1 italic">&quot;{generatedSurvey.persona}&quot;</div>
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-border-subtle flex flex-col gap-3">
@@ -432,7 +434,7 @@ export default function CreatorDashboard() {
                                 {answers.length > 0 ? (
                                   answers.map((answer, aidx) => (
                                     <li key={aidx} className="text-sm text-on_surface_variant leading-relaxed">
-                                      • "{answer}"
+                                      • &quot;{answer}&quot;
                                     </li>
                                   ))
                                 ) : (
@@ -546,7 +548,7 @@ export default function CreatorDashboard() {
               </div>
             ) : (
               <div className="glass-panel p-12 text-center text-sm text-on_surface_variant">
-                Create a survey under the "Design Survey" tab to get started!
+                Create a survey under the &quot;Design Survey&quot; tab to get started!
               </div>
             )}
           </motion.div>

@@ -1,108 +1,136 @@
 import fs from 'fs';
 import path from 'path';
-import defaultDb from '../../db.json';
 
-export interface SurveyBlueprint {
-  id: string;
-  title: string;
-  topic: string;
-  description: string;
-  goals: string[];
-  persona: string;
-  createdAt: string;
-}
+import type { ScreeningCase, Patient } from '../components/netra/types';
 
-export interface RespondentSession {
-  id: string;
-  surveyId: string;
-  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
-  extractedPoints: Record<string, string>; // Maps goal -> summary of response
-  completed: boolean;
-  createdAt: string;
-}
+// Re-export types so API routes can import from one place
+export type { ScreeningCase, Patient };
+
+// ── Schema ──────────────────────────────────────────────────────────────────
 
 interface DatabaseSchema {
-  surveys: Record<string, SurveyBlueprint>;
-  sessions: Record<string, RespondentSession>;
+  cases: Record<string, ScreeningCase>;
+  patients: Record<string, Patient>;
 }
 
-// Check if running on Vercel
+const EMPTY_DB: DatabaseSchema = { cases: {}, patients: {} };
+
+// ── DB-1 FIX: Write mutex ────────────────────────────────────────────────────
+// Next.js API routes run in the same Node process. Without a lock, two
+// simultaneous POSTs (e.g. /api/cases + /api/patients during hydration) both
+// call loadDb(), get the same snapshot, then one write overwrites the other.
+// A simple Promise-based mutex serialises all write operations.
+let _writeLock: Promise<void> = Promise.resolve();
+
+
+
+// Upgrade to async queue for true protection:
+async function acquireWriteLock(): Promise<() => void> {
+  let release!: () => void;
+  const prev = _writeLock;
+  _writeLock = new Promise<void>((res) => { release = res; });
+  await prev;
+  return release;
+}
+
+// ── Path resolution ──────────────────────────────────────────────────────────
+
 const IS_VERCEL = !!process.env.VERCEL;
 
-// Resolve the read-only and writeable paths
 const READONLY_DB_PATH = path.join(process.cwd(), 'db.json');
 const WRITEABLE_DB_PATH = path.join('/tmp', 'db.json');
-
 const DB_FILE_PATH = IS_VERCEL ? WRITEABLE_DB_PATH : READONLY_DB_PATH;
 
-// Helper to initialize or load the database safely
+// ── Core helpers ─────────────────────────────────────────────────────────────
+
 function loadDb(): DatabaseSchema {
   try {
-    if (IS_VERCEL) {
-      // If the writeable db.json doesn't exist in /tmp, copy it from defaultDb
-      if (!fs.existsSync(WRITEABLE_DB_PATH)) {
-        fs.writeFileSync(WRITEABLE_DB_PATH, JSON.stringify(defaultDb, null, 2), 'utf8');
-      }
-    } else {
-      // Local development flow
-      if (!fs.existsSync(READONLY_DB_PATH)) {
-        fs.writeFileSync(READONLY_DB_PATH, JSON.stringify(defaultDb, null, 2), 'utf8');
-      }
+    if (IS_VERCEL && !fs.existsSync(WRITEABLE_DB_PATH)) {
+      fs.writeFileSync(WRITEABLE_DB_PATH, JSON.stringify(EMPTY_DB, null, 2), 'utf8');
+    } else if (!IS_VERCEL && !fs.existsSync(READONLY_DB_PATH)) {
+      fs.writeFileSync(READONLY_DB_PATH, JSON.stringify(EMPTY_DB, null, 2), 'utf8');
     }
-
     const data = fs.readFileSync(DB_FILE_PATH, 'utf8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    // Ensure both top-level keys always exist (handles old db.json formats)
+    return {
+      cases: parsed.cases ?? {},
+      patients: parsed.patients ?? {},
+    };
   } catch (error) {
-    console.error("Error loading JSON database:", error);
-    return defaultDb as DatabaseSchema;
+    console.error('[NetramNova DB] Error loading database:', error);
+    return { ...EMPTY_DB };
   }
 }
 
-// Helper to write changes to disk safely
 function saveDb(db: DatabaseSchema): void {
   try {
     fs.writeFileSync(DB_FILE_PATH, JSON.stringify(db, null, 2), 'utf8');
   } catch (error) {
-    console.error("Error saving JSON database:", error);
+    console.error('[NetramNova DB] Error saving database:', error);
   }
 }
 
-// === Survey CRUD Methods ===
+// ── Screening Cases CRUD ─────────────────────────────────────────────────────
 
-export function saveSurvey(survey: SurveyBlueprint): void {
-  const db = loadDb();
-  db.surveys[survey.id] = survey;
-  saveDb(db);
+export async function saveCase(c: ScreeningCase): Promise<void> {
+  const release = await acquireWriteLock();
+  try {
+    const db = loadDb();
+    db.cases[c.id] = c;
+    saveDb(db);
+  } finally {
+    release();
+  }
 }
 
-export function getSurvey(id: string): SurveyBlueprint | null {
+export function getCase(id: string): ScreeningCase | null {
   const db = loadDb();
-  return db.surveys[id] || null;
+  return db.cases[id] ?? null;
 }
 
-export function listSurveys(): SurveyBlueprint[] {
+export function listCases(): ScreeningCase[] {
   const db = loadDb();
-  return Object.values(db.surveys).sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  return Object.values(db.cases).sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 }
 
-// === Session CRUD Methods ===
-
-export function saveSession(session: RespondentSession): void {
-  const db = loadDb();
-  db.sessions[session.id] = session;
-  saveDb(db);
+export async function updateCase(
+  id: string,
+  patch: Partial<Pick<ScreeningCase, 'doctorReviewStatus' | 'doctorNotes' | 'synced'>>
+): Promise<ScreeningCase | null> {
+  const release = await acquireWriteLock();
+  try {
+    const db = loadDb();
+    if (!db.cases[id]) return null;
+    db.cases[id] = { ...db.cases[id], ...patch };
+    saveDb(db);
+    return db.cases[id];
+  } finally {
+    release();
+  }
 }
 
-export function getSession(id: string): RespondentSession | null {
-  const db = loadDb();
-  return db.sessions[id] || null;
+// ── Patients CRUD ─────────────────────────────────────────────────────────────
+
+export async function savePatient(p: Patient): Promise<void> {
+  const release = await acquireWriteLock();
+  try {
+    const db = loadDb();
+    db.patients[p.id] = p;
+    saveDb(db);
+  } finally {
+    release();
+  }
 }
 
-export function listSessionsForSurvey(surveyId: string): RespondentSession[] {
+export function getPatient(id: string): Patient | null {
   const db = loadDb();
-  return Object.values(db.sessions)
-    .filter((s) => s.surveyId === surveyId)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return db.patients[id] ?? null;
+}
+
+export function listPatients(): Patient[] {
+  const db = loadDb();
+  return Object.values(db.patients);
 }

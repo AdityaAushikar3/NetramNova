@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+import { AuthGuard } from "../components/AuthGuard";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -14,7 +15,7 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "NetramNova - Clinical DR Screening Workstation",
-  description: "AI-powered offline-first Diabetic Retinopathy screening workstation",
+  description: "AI-powered offline-first Diabetic Retinopathy screening workstation for rural India PHCs",
 };
 
 export default function RootLayout({
@@ -33,8 +34,11 @@ export default function RootLayout({
           <div className="glow-blob glow-blob-2"></div>
           <div className="glow-blob glow-blob-3"></div>
         </div>
-        {children}
+        <AuthGuard>
+          {children}
+        </AuthGuard>
       </body>
     </html>
   );
 }
+

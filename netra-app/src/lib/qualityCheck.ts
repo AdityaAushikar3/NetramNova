@@ -18,16 +18,17 @@ export interface QualityMetrics {
  * Analyzes an HTMLImageElement using canvas pixel data to run Step 2 Quality Gate
  */
 export function analyzeFundusQuality(imgElement: HTMLImageElement): QualityMetrics {
-  // Fallback defaults if image is unreadable or zero-sized
+  // Fallback for when image is unreadable / CORS-blocked / zero-sized.
+  // Return gradable=false so the UI shows a warning instead of fake passing metrics.
   const fallbackMetrics: QualityMetrics = {
-    gradable: true,
-    qualityStatus: 'passed',
-    rejectionReasons: [],
-    fovCoverageRatio: 0.85,
-    focusScore: 185.4,
-    meanIllumination: 112.5,
-    glareRatio: 0.01,
-    retinaVisible: true,
+    gradable: false,
+    qualityStatus: 'warning',
+    rejectionReasons: ['Image quality analysis unavailable — CORS or decode error'],
+    fovCoverageRatio: 0,
+    focusScore: 0,
+    meanIllumination: 0,
+    glareRatio: 0,
+    retinaVisible: false,
   };
 
   if (!imgElement || imgElement.naturalWidth === 0 || imgElement.naturalHeight === 0) {

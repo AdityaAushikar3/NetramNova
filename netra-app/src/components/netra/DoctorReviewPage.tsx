@@ -25,8 +25,11 @@ export const DoctorReviewPage: React.FC<DoctorReviewPageProps> = ({
   cases: propCases,
   onUpdateCaseStatus,
 }) => {
-  const cases = propCases || MOCK_CASES;
-  const [selectedCaseId, setSelectedCaseId] = useState<string>(cases[0]?.id || MOCK_CASES[0].id);
+  // UI-1 FIX: Only fall back to MOCK_CASES when propCases is truly empty (length 0),
+  // not just undefined. An empty real array is falsy-equivalent but truthy, so
+  // the old `propCases || MOCK_CASES` would never trigger for an empty DB.
+  const cases = (propCases && propCases.length > 0) ? propCases : MOCK_CASES;
+  const [selectedCaseId, setSelectedCaseId] = useState<string>(cases[0]?.id || '');
   const [activeQueueTab, setActiveQueueTab] = useState<'high' | 'standard'>('high');
 
   // Decision form state
@@ -35,10 +38,18 @@ export const DoctorReviewPage: React.FC<DoctorReviewPageProps> = ({
   const [notes, setNotes] = useState<string>('Confirmed findings of temporal MAs and perimacular hard exudates. Recommend 6-month follow-up.');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
-  const selectedCase = cases.find((c) => c.id === selectedCaseId) || cases[0] || MOCK_CASES[0];
+  const selectedCase = cases.find((c) => c.id === selectedCaseId) || cases[0];
 
-  const highPriorityCases = cases.filter((c) => c.priority === 'HIGH PRIORITY');
-  const standardPriorityCases = cases.filter((c) => c.priority === 'STANDARD REVIEW');
+  // UI-2 FIX: Real ML cases from /api/classify never have priority set explicitly.
+  // Derive priority from icdrLevel so they appear in the correct queue tab.
+  const getEffectivePriority = (c: ScreeningCase): 'HIGH PRIORITY' | 'STANDARD REVIEW' => {
+    if (c.priority) return c.priority;
+    if (c.result && c.result.icdrLevel >= 2) return 'HIGH PRIORITY';
+    return 'STANDARD REVIEW';
+  };
+
+  const highPriorityCases = cases.filter((c) => getEffectivePriority(c) === 'HIGH PRIORITY');
+  const standardPriorityCases = cases.filter((c) => getEffectivePriority(c) === 'STANDARD REVIEW');
 
   const visibleQueueCases = activeQueueTab === 'high' ? highPriorityCases : standardPriorityCases;
 

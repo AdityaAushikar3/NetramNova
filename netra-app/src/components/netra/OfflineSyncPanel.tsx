@@ -31,7 +31,9 @@ export const OfflineSyncPanel: React.FC<OfflineSyncPanelProps> = ({
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [syncProgress, setSyncProgress] = useState<number>(0);
   const syncTimerRef = React.useRef<NodeJS.Timeout | null>(null);
-  const cases = propCases || MOCK_CASES;
+  // Same fix as DoctorReviewPage: empty array [] is truthy, so `propCases || MOCK_CASES`
+  // never falls back when the DB is empty. Use length-check instead.
+  const cases = (propCases && propCases.length > 0) ? propCases : MOCK_CASES;
 
   const pendingCases = cases.filter((c) => !c.synced);
 

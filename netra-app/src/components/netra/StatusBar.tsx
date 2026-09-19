@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ConnectivityState, LanguageCode } from './types';
-import { Activity, ShieldCheck, Wifi, WifiOff, RefreshCw, Cpu, UserCheck, Globe } from 'lucide-react';
+import { Wifi, WifiOff, RefreshCw, Cpu, UserCheck, Globe, Server } from 'lucide-react';
 
 interface StatusBarProps {
   connectivity: ConnectivityState;
@@ -16,6 +16,37 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   pendingSyncCount,
 }) => {
   const [lang, setLang] = useState<LanguageCode>('en');
+  const [mlRunning, setMlRunning] = useState<boolean | null>(null);
+  const [operatorName, setOperatorName] = useState<string>('Operator');
+  const [operatorRole, setOperatorRole] = useState<string>('Health Worker');
+
+  useEffect(() => {
+    // Read session from localStorage
+    try {
+      const raw = localStorage.getItem('netramnova_session');
+      if (raw) {
+        const session = JSON.parse(raw);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        if (session.name) setOperatorName(session.name);
+         
+        if (session.role) setOperatorRole(session.role === 'doctor' ? 'Doctor' : 'Health Worker');
+      }
+    } catch {}
+
+    // Poll ML service status
+    async function checkMl() {
+      try {
+        const res = await fetch('/api/ml-status');
+        const data = await res.json();
+        setMlRunning(data.running);
+      } catch {
+        setMlRunning(false);
+      }
+    }
+    checkMl();
+    const interval = setInterval(checkMl, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="w-full bg-slate-900 text-slate-100 border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs shadow-md select-none">
@@ -78,6 +109,23 @@ export const StatusBar: React.FC<StatusBarProps> = ({
           </button>
         </div>
 
+        {/* ML Service Status Badge */}
+        <div
+          title={mlRunning ? 'Flask ML service is running on port 5000 (fast mode)' : 'Flask not running — using Python CLI fallback (~10s)'}
+          className={`hidden md:flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-mono font-semibold ${
+            mlRunning === true
+              ? 'bg-emerald-950/70 border-emerald-700/50 text-emerald-300'
+              : mlRunning === false
+              ? 'bg-amber-950/70 border-amber-700/50 text-amber-300'
+              : 'bg-slate-800 border-slate-700 text-slate-400'
+          }`}
+        >
+          <Server className="w-3 h-3" />
+          <span>
+            {mlRunning === true ? 'ML:FAST' : mlRunning === false ? 'ML:CLI' : 'ML:...'}
+          </span>
+        </div>
+
         {/* Connectivity Toggle Badge */}
         <button
           onClick={onToggleConnectivity}
@@ -113,8 +161,8 @@ export const StatusBar: React.FC<StatusBarProps> = ({
         {/* Operator Profile */}
         <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 bg-slate-800 border border-slate-700 rounded text-slate-300 text-xs">
           <UserCheck className="w-3.5 h-3.5 text-teal-400" />
-          <span className="font-sans font-medium text-slate-200">ANM Sunita R.</span>
-          <span className="text-slate-500 font-mono text-xs">#8492</span>
+          <span className="font-sans font-medium text-slate-200">{operatorName}</span>
+          <span className="text-slate-500 font-mono text-xs">• {operatorRole}</span>
         </div>
       </div>
     </header>

@@ -22,13 +22,30 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
   const [cameraDevice, setCameraDevice] = useState<string>('Remidio NM-FOP');
   const [phcLocation, setPhcLocation] = useState<string>('Telangana East PHC #04');
 
+  // Reset all form fields to defaults
+  const resetForm = () => {
+    setName('');
+    setAge(52);
+    setSex('Female');
+    setDiabetesHistory('Type 2 DM (8 years) • HbA1c 8.2%');
+    setCameraDevice('Remidio NM-FOP');
+    setPhcLocation('Telangana East PHC #04');
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const newId = `PT-${Math.floor(1000 + Math.random() * 9000)}`;
+    // UI-10 FIX: Math.floor(Math.random() * 9000) only has 9000 possibilities —
+    // ~1% collision chance after 133 patients. Use timestamp + random suffix instead.
+    const newId = `PT-${Date.now().toString(36).toUpperCase().slice(-4)}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     const newPatient: Patient = {
       id: newId,
       name: name.trim(),
@@ -41,7 +58,8 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
     };
 
     onAddPatient(newPatient);
-    onClose();
+    resetForm();
+    handleClose();
   };
 
   return (
@@ -57,7 +75,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 text-slate-400 hover:text-slate-100 rounded transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -98,7 +116,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
               <label className="text-xs font-mono text-slate-400">Gender *</label>
               <select
                 value={sex}
-                onChange={(e) => setSex(e.target.value as any)}
+                onChange={(e) => setSex(e.target.value as 'Male' | 'Female' | 'Other')}
                 className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
               >
                 <option value="Female">Female</option>
@@ -139,7 +157,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
           <div className="pt-2 flex justify-end gap-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition-colors cursor-pointer"
             >
               Cancel

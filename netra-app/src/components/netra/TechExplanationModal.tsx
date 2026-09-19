@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, ShieldCheck, Cpu, Layers, Eye, CheckCircle2, FileText } from 'lucide-react';
+import { X, Cpu, Layers, Eye, CheckCircle2, FileText } from 'lucide-react';
 
 interface TechExplanationModalProps {
   isOpen: boolean;

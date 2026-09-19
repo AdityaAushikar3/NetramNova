@@ -42,7 +42,17 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
   const [activeDiseaseFilter, setActiveDiseaseFilter] = useState<DiseaseFilterType>('all');
 
   const result = caseData.result;
-  if (!result) return null;
+  // UI-4 FIX: Return an explicit message instead of null when result is missing.
+  // Previously, returning null caused a completely blank panel with no feedback.
+  if (!result) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center py-16 gap-3 text-slate-500 font-sans">
+        <AlertCircle className="w-10 h-10 opacity-40" />
+        <p className="text-sm font-mono text-slate-400">No analysis result available for this case.</p>
+        <p className="text-xs text-slate-600 font-mono">Upload a fundus image and run analysis to generate a clinical report.</p>
+      </div>
+    );
+  }
 
   const getSeverityBadgeClass = (severity: string) => {
     switch (severity) {
@@ -165,7 +175,7 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
               AI Preprocessing & Model Input Audit
             </div>
             <div className="text-sm font-bold text-slate-200 mt-0.5 font-sans">
-              "Raw Acquisition (Before) • Standardized 512×512 Tensor (After)"
+              &quot;Raw Acquisition (Before) • Standardized 512×512 Tensor (After)&quot;
             </div>
           </div>
 

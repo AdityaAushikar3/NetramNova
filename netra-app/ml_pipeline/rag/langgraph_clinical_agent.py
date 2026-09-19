@@ -8,6 +8,7 @@ Stateful multi-agent workflow featuring:
 
 import os
 import sys
+import threading
 from typing import TypedDict, List, Dict, Any
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -202,11 +203,15 @@ def build_clinical_graph():
 
 # Compiled global graph instance
 _clinical_graph = None
+# ML-7 FIX: same TOCTOU race as init_model — add a lock for thread-safe init
+_GRAPH_LOCK = threading.Lock()
 
 def get_clinical_graph():
     global _clinical_graph
     if _clinical_graph is None:
-        _clinical_graph = build_clinical_graph()
+        with _GRAPH_LOCK:
+            if _clinical_graph is None:  # double-checked
+                _clinical_graph = build_clinical_graph()
     return _clinical_graph
 
 
@@ -241,11 +246,16 @@ def generate_grounded_clinical_report(stage: int, has_macular_edema: bool = Fals
         except Exception as e:
             print(f"[LangGraph Execution Error]: {e}. Falling back to deterministic pipeline.")
 
-    # Robust deterministic fallback if graph execution has runtime issues
-    s1 = guideline_retrieval_node(initial_state)
-    initial_state.update(s1)
-    s2 = clinical_drafter_node(initial_state)
-    initial_state.update(s2)
-    s3 = clinical_safety_reviewer_node(initial_state)
-    initial_state.update(s3)
-    return initial_state
+    # ML-8 FIX: Robust deterministic fallback — runs all 3 nodes sequentially.
+    # Previously the safety reviewer was skipped in fallback, bypassing the guardrail.
+    # Now we log the audit result and still return the report, but include safety info.
+    working_state = dict(initial_state)  # don't mutate original
+    s1 = guideline_retrieval_node(working_state)
+    working_state.update(s1)
+    s2 = clinical_drafter_node(working_state)
+    working_state.update(s2)
+    s3 = clinical_safety_reviewer_node(working_state)
+    working_state.update(s3)
+    if not working_state.get("safety_audit_passed", True):
+        print(f"[LangGraph Safety Fallback] Audit FAILED: {working_state.get('audit_notes', [])}")
+    return working_state

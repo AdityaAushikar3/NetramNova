@@ -17,6 +17,7 @@ import sys
 import json
 import base64
 import argparse
+import threading
 from io import BytesIO
 from pathlib import Path
 
@@ -37,8 +38,9 @@ try:
 except ImportError:
     from ml_pipeline.rag.langgraph_clinical_agent import generate_grounded_clinical_report
 
-# Initialize Flask app
-app = Flask(__name__)
+# ML-2 FIX: Removed dead module-level app = Flask(__name__) here.
+# The real Flask app with all routes is created inside start_server().
+# The module-level app was never used and would break `gunicorn inference_service:app` usage.
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -50,6 +52,10 @@ from ml_pipeline.evaluation.etdrs_quadrant_engine import ETDRSQuadrantEngine, Qu
 from ml_pipeline.evaluation.ma_patch_engine import MAPatchRescueEngine, MicroaneurysmAuditResult
 
 # Global state
+# ML-1 FIX: Use a threading.Lock to prevent race conditions when Flask handles
+# concurrent requests — without this, two simultaneous requests can both pass
+# the `MODEL is None` check and double-load the model, corrupting globals.
+_MODEL_LOCK = threading.Lock()
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MODEL = None
 TRANSFORM = None
@@ -70,28 +76,33 @@ SEVERITY_KEYS = ["normal", "mild", "moderate", "severe", "proliferative"]
 
 def init_model(ckpt_path: str = "ml_pipeline/outputs/checkpoints/best_classifier.pt"):
     global MODEL, TRANSFORM, GRADCAM
+    # ML-1 FIX: Fast-path check outside the lock to avoid acquiring it on every inference call
     if MODEL is not None:
         return
+    with _MODEL_LOCK:
+        # Double-checked locking: re-check inside the lock in case another thread loaded it first
+        if MODEL is not None:
+            return
 
-    # Check path existence or fallback to absolute path relative to this script
-    if not os.path.exists(ckpt_path):
-        fallback = Path(__file__).resolve().parent / "outputs" / "checkpoints" / "best_classifier.pt"
-        if fallback.exists():
-            ckpt_path = str(fallback)
+        # Check path existence or fallback to absolute path relative to this script
+        if not os.path.exists(ckpt_path):
+            fallback = Path(__file__).resolve().parent / "outputs" / "checkpoints" / "best_classifier.pt"
+            if fallback.exists():
+                ckpt_path = str(fallback)
 
-    print(f"[NetramNova Service] Loading trained classifier from: {ckpt_path} on {DEVICE}...", file=sys.stderr)
-    MODEL = timm.create_model("efficientnet_b2", pretrained=False, num_classes=5)
-    ckpt = torch.load(ckpt_path, map_location=DEVICE, weights_only=False)
-    state_dict = ckpt["model_state_dict"] if "model_state_dict" in ckpt else ckpt
-    cleaned_state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
-    MODEL.load_state_dict(cleaned_state_dict, strict=True)
-    MODEL = MODEL.to(DEVICE)
-    MODEL.eval()
+        print(f"[NetramNova Service] Loading trained classifier from: {ckpt_path} on {DEVICE}...", file=sys.stderr)
+        MODEL = timm.create_model("efficientnet_b2", pretrained=False, num_classes=5)
+        ckpt = torch.load(ckpt_path, map_location=DEVICE, weights_only=False)
+        state_dict = ckpt["model_state_dict"] if "model_state_dict" in ckpt else ckpt
+        cleaned_state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
+        MODEL.load_state_dict(cleaned_state_dict, strict=True)
+        MODEL = MODEL.to(DEVICE)
+        MODEL.eval()
 
-    TRANSFORM = get_val_transforms(512)
-    GRADCAM = GradCAM(MODEL, target_layer=MODEL.conv_head)
-    print(f"[NetramNova Service] Verified trained model loaded (Epoch: {ckpt.get('epoch', '?')}, Best QWK: {ckpt.get('best_qwk', '?')})", file=sys.stderr)
-    print("[NetramNova Service] Model and Grad-CAM successfully initialized!", file=sys.stderr)
+        TRANSFORM = get_val_transforms(512)
+        GRADCAM = GradCAM(MODEL, target_layer=MODEL.conv_head)
+        print(f"[NetramNova Service] Verified trained model loaded (Epoch: {ckpt.get('epoch', '?')}, Best QWK: {ckpt.get('best_qwk', '?')})", file=sys.stderr)
+        print("[NetramNova Service] Model and Grad-CAM successfully initialized!", file=sys.stderr)
 
 
 def crop_fundus_circle(img: np.ndarray, tol: int = 7) -> np.ndarray:
@@ -222,7 +233,15 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
         audited_grade, rescue_note = MA_ENGINE.audit_classification(raw_pred, probs, ma_result)
 
     final_grade = audited_grade
-    conf_score = float(probs[final_grade] * 100.0)
+    # ML-4 FIX: When a clinical rule upgrades the grade, probs[final_grade] may be very low
+    # (e.g., raw model gave grade 2 at 85%, ETDRS auditor upgrades to grade 3 at only 12%).
+    # In that case, report the referable probability (p_ref) as the confidence instead,
+    # since that is the actual clinically meaningful confidence signal.
+    if final_grade == raw_pred:
+        conf_score = float(probs[final_grade] * 100.0)
+    else:
+        # Grade was upgraded by clinical rule — use referable probability as confidence
+        conf_score = float(p_ref * 100.0)
 
     # If grade was upgraded, update Grad-CAM for final grade
     if final_grade != raw_pred:
@@ -461,8 +480,15 @@ if __name__ == "__main__":
             print(json.dumps({"error": "Missing --image path for CLI mode"}))
             sys.exit(1)
         import contextlib
-        with contextlib.redirect_stdout(sys.stderr):
-            res = run_pipeline_on_image(image_path=args.image)
-        print(json.dumps(res))
+        # ML-3 FIX: Wrap in try/except so any unhandled exception (e.g. missing checkpoint,
+        # corrupt image) is returned as valid JSON error instead of crashing silently.
+        # The Next.js route parser would otherwise fail on empty/non-JSON stdout.
+        try:
+            with contextlib.redirect_stdout(sys.stderr):
+                res = run_pipeline_on_image(image_path=args.image)
+            print(json.dumps(res))
+        except Exception as e:
+            print(json.dumps({"error": str(e), "type": type(e).__name__}))
+            sys.exit(1)
     else:
         start_server(port=args.port)

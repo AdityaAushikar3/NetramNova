@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Patient, ScreeningCase, ImageQualityCheck } from './types';
-import { MOCK_PATIENTS, MOCK_CASES } from './mockData';
+import { Patient, ScreeningCase } from './types';
+import { MOCK_PATIENTS } from './mockData';
 import { RetinalAnalysisPanel } from './RetinalAnalysisPanel';
 import { NewPatientModal } from './NewPatientModal';
 import { analyzeFundusQuality, QualityMetrics } from '../../lib/qualityCheck';
@@ -18,8 +18,6 @@ import {
   Loader2,
   Check,
   Upload,
-  Image as ImageIcon,
-  Layers,
   Plus,
   AlertTriangle,
   XCircle,
@@ -27,17 +25,24 @@ import {
 
 interface ScreeningPageProps {
   onCaseCompleted?: (newCase: ScreeningCase) => void;
+  /** Called when a new patient is registered from this page's modal, so parent can persist to DB */
+  onPatientAdded?: (patient: Patient) => void;
   initialPatientId?: string;
+  /** DB-loaded patients from the parent. Falls back to MOCK_PATIENTS if not provided. */
+  patients?: Patient[];
 }
 
-export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, initialPatientId }) => {
-  const [patientsList, setPatientsList] = useState<Patient[]>(MOCK_PATIENTS);
+export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, onPatientAdded, initialPatientId, patients: patientsProp }) => {
+  // Use DB-loaded patients from parent; fall back to mock
+  const currentPatients = patientsProp && patientsProp.length > 0 ? patientsProp : MOCK_PATIENTS;
+
   const [selectedPatient, setSelectedPatient] = useState<Patient>(() => {
+    const src = patientsProp ?? MOCK_PATIENTS;
     if (initialPatientId) {
-      const match = MOCK_PATIENTS.find((p) => p.id === initialPatientId);
+      const match = src.find((p) => p.id === initialPatientId);
       if (match) return match;
     }
-    return MOCK_PATIENTS[0];
+    return src[0] ?? MOCK_PATIENTS[0];
   });
 
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -49,21 +54,41 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
   // Processing state machine: 'idle' | 'processing' | 'completed'
   const [stage, setStage] = useState<'idle' | 'processing' | 'completed'>('idle');
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
-  const [activeCase, setActiveCase] = useState<ScreeningCase>(MOCK_CASES[0]);
+  // BUG 6 FIX: explicit error state so failures show a clear message, not stale MOCK data
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  // UI-3 FIX: Initialize with a blank case, not MOCK_CASES[0].
+  // Spreading MOCK_CASES[0] put a fake 'Moderate DR' result, 'completed' status,
+  // and '/samples/moderate_dr.jpg' imageUrl into state before any scan is run.
+  const [activeCase, setActiveCase] = useState<ScreeningCase>({
+    id: '',
+    patient: patientsProp?.[0] ?? MOCK_PATIENTS[0],
+    timestamp: new Date().toISOString(),
+    imageUrl: undefined,
+    quality: {
+      fovDetected: false,
+      focusAcceptable: false,
+      exposureAcceptable: false,
+      retinaVisible: false,
+      blurScore: 0,
+      illuminationUniformity: 0,
+    },
+    qualityStatus: 'passed',
+    status: 'new',
+    result: undefined,
+    synced: false,
+  });
 
   useEffect(() => {
     if (initialPatientId) {
-      const match = patientsList.find((p) => p.id === initialPatientId);
+      const match = currentPatients.find((p) => p.id === initialPatientId);
       if (match) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedPatient(match);
-        const matchedCase = MOCK_CASES.find((c) => c.patient.id === match.id) || MOCK_CASES[0];
-        setActiveCase({
-          ...matchedCase,
-          patient: match,
-        });
+         
+        setActiveCase((prev) => ({ ...prev, patient: match }));
       }
     }
-  }, [initialPatientId, patientsList]);
+  }, [initialPatientId, currentPatients]);
 
   // Live Step 2 Quality Metrics state
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({
@@ -91,34 +116,24 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
   const handlePatientSelect = (p: Patient) => {
     setSelectedPatient(p);
     setCustomImageUrl(null);
-    const matchedCase = MOCK_CASES.find((c) => c.patient.id === p.id) || MOCK_CASES[0];
-    setActiveCase({
-      ...matchedCase,
-      patient: p,
-    });
+    setSelectedFile(null);
+    setStage('idle');
+    setActiveCase((prev) => ({ ...prev, patient: p }));
   };
 
+  // BUG 1 & 4 FIX:
+  // BUG 1: Never inject MOCK result data for a newly registered patient.
+  //        A newly registered patient has no scan yet — status should be 'new', result undefined.
+  // BUG 4: Call onPatientAdded prop so the parent (page.tsx) persists the new patient to the DB.
+  //        Previously this only updated local patientsList state and the patient was lost on refresh.
   const handleAddPatient = (newPatient: Patient) => {
-    setPatientsList((prev) => [newPatient, ...prev]);
     setSelectedPatient(newPatient);
-    setActiveCase({
-      id: `CASE-2026-${Math.floor(100 + Math.random() * 900)}`,
-      patient: newPatient,
-      timestamp: new Date().toISOString(),
-      imageUrl: customImageUrl || '/samples/moderate_dr.jpg',
-      quality: {
-        fovDetected: true,
-        focusAcceptable: true,
-        exposureAcceptable: true,
-        retinaVisible: true,
-        blurScore: 0.95,
-        illuminationUniformity: 0.92,
-      },
-      qualityStatus: 'passed',
-      status: 'completed',
-      result: MOCK_CASES[0].result,
-      synced: false,
-    });
+    setStage('idle');
+    setCustomImageUrl(null);
+    setSelectedFile(null);
+    setActiveCase((prev) => ({ ...prev, patient: newPatient, status: 'new', result: undefined }));
+    // Notify parent to persist to DB
+    onPatientAdded?.(newPatient);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,6 +155,7 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
   const handleStartAnalysis = async () => {
     setStage('processing');
     setCurrentStepIndex(0);
+    setAnalysisError(null); // clear previous errors
 
     let step = 0;
     const interval = setInterval(() => {
@@ -151,12 +167,18 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
       const formData = new FormData();
       if (selectedFile) {
         formData.append('file', selectedFile);
-      } else {
-        // Fetch current sample image as blob
-        const sampleUrl = currentPreviewUrl;
-        const res = await fetch(sampleUrl);
+      } else if (currentPreviewUrl) {
+        // BUG 5 FIX: Only fetch the preview URL if it's a real blob URL (user uploaded)
+        // Do not attempt to fetch a non-existent /samples/ path
+        const res = await fetch(currentPreviewUrl);
+        if (!res.ok) throw new Error('Could not load the preview image for analysis.');
         const blob = await res.blob();
         formData.append('file', blob, 'sample_fundus.jpg');
+      } else {
+        clearInterval(interval);
+        setStage('idle');
+        setAnalysisError('Please upload a fundus image before running analysis.');
+        return;
       }
 
       const apiRes = await fetch('/api/classify', {
@@ -174,11 +196,16 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
       setCurrentStepIndex(processingSteps.length - 1);
 
       setTimeout(() => {
-        const updatedCase: ScreeningCase = {
-          ...activeCase,
+        const completedCase: ScreeningCase = {
+          id: `CASE-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+          patient: selectedPatient,
+          timestamp: new Date().toISOString(),
+          imageUrl: currentPreviewUrl ?? undefined,
           status: 'completed',
           quality: data.quality || activeCase.quality,
           qualityStatus: data.qualityStatus || activeCase.qualityStatus,
+          synced: false,
+          doctorReviewStatus: 'pending',
           result: {
             diagnosis: data.diagnosis || 'Retinal Assessment Complete',
             icdrLevel: data.icdrLevel ?? 0,
@@ -199,24 +226,47 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
           },
         };
 
-        setActiveCase(updatedCase);
+        setActiveCase(completedCase);
         setStage('completed');
-        if (onCaseCompleted) {
-          onCaseCompleted(updatedCase);
-        }
+        onCaseCompleted?.(completedCase);
       }, 400);
     } catch (err) {
-      console.error('Classification error:', err);
+      // BUG 6 FIX: Show explicit error state instead of silently displaying stale MOCK data
       clearInterval(interval);
-      setStage('completed');
+      console.error('[NetramNova] Classification error:', err);
+      setStage('idle');
+      setAnalysisError(
+        err instanceof Error ? err.message : 'Analysis failed. Please try again.'
+      );
     }
   };
 
   const handleResetScreening = () => {
+    // Clean up blob URL to prevent memory leak
+    if (customImageUrl && customImageUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(customImageUrl);
+    }
     setStage('idle');
+    setCustomImageUrl(null);
+    setSelectedFile(null);
+    setAnalysisError(null);
+    // Reset activeCase back to blank (no stale result/imageUrl from previous scan)
+    setActiveCase((prev) => ({
+      ...prev,
+      id: '',
+      imageUrl: undefined,
+      status: 'new',
+      result: undefined,
+      quality: { fovDetected: false, focusAcceptable: false, exposureAcceptable: false, retinaVisible: false, blurScore: 0, illuminationUniformity: 0 },
+      qualityStatus: 'passed',
+      synced: false,
+    }));
   };
 
-  const currentPreviewUrl = customImageUrl || activeCase.imageUrl || '/samples/moderate_dr.jpg';
+  // BUG 5 FIX: Remove hardcoded fallback to '/samples/moderate_dr.jpg' which doesn't exist in public/.
+  // If no file is uploaded, use a placeholder. The analyze button is still available
+  // but the user should be prompted to upload a real image.
+  const currentPreviewUrl = customImageUrl || null;
 
   const filteredPatients = patientsList.filter(
     (p) =>
@@ -378,10 +428,11 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
                       ></div>
                     </div>
                   </div>
-                ) : (
+                ) : currentPreviewUrl ? (
                   /* Real Fundus Image Display */
                   <div className="relative flex flex-col items-center justify-center text-center space-y-2">
                     <div className="w-44 h-44 rounded-full border-2 border-emerald-500/60 overflow-hidden shadow-2xl relative bg-black">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         ref={previewImgRef}
                         src={currentPreviewUrl}
@@ -399,6 +450,15 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
                     <p className="text-xs text-slate-300 font-mono">
                       Acquired via {cameraDevice} • 45° Non-Mydriatic FOV
                     </p>
+                  </div>
+                ) : (
+                  /* BUG 5 FIX: No image loaded — show upload prompt placeholder */
+                  <div className="flex flex-col items-center justify-center gap-3 text-slate-500">
+                    <Camera className="w-12 h-12 opacity-30" />
+                    <div className="text-center">
+                      <p className="text-xs font-mono font-bold text-slate-400">No Fundus Image Loaded</p>
+                      <p className="text-xs font-mono text-slate-600 mt-0.5">Upload a JPEG/PNG fundus photograph to begin analysis</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -453,16 +513,28 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
                 </div>
               )}
 
+              {/* BUG 6 FIX: Analysis Error Banner */}
+              {analysisError && (
+                <div className="p-2.5 bg-rose-950/60 border border-rose-800 rounded text-rose-200 text-xs font-mono flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>{analysisError}</span>
+                </div>
+              )}
+
               {/* Action Trigger Button */}
               <div className="pt-2">
                 <button
                   onClick={handleStartAnalysis}
-                  disabled={stage === 'processing'}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-sans font-bold text-sm rounded shadow flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  disabled={stage === 'processing' || !currentPreviewUrl}
+                  title={!currentPreviewUrl ? 'Upload a fundus image first' : undefined}
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-sans font-bold text-sm rounded shadow flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Play className="w-4 h-4 fill-white" />
-                  <span>Execute Foracchia Normalization & Retinal Assessment</span>
+                  <span>Execute Foracchia Normalization &amp; Retinal Assessment</span>
                 </button>
+                {!currentPreviewUrl && (
+                  <p className="text-center text-xs text-slate-500 font-mono mt-1.5">⬆ Upload a fundus JPEG/PNG to enable analysis</p>
+                )}
               </div>
             </div>
           </div>

@@ -1,262 +1,45 @@
 {
-  "surveys": {
-    "1780311673062": {
-      "id": "1780311673062",
-      "title": "Feline Feelings: Your Cat's Health Impact",
-      "topic": "How cats affect human health ",
-      "description": "see how humans feel after spending time with cat ",
-      "goals": [
-        "To understand the perceived emotional benefits of interacting with cats (e.g., reduced stress, increased happiness).",
-        "To identify any reported physical health improvements associated with cat ownership or interaction.",
-        "To explore the frequency and duration of interactions that correlate with perceived health benefits.",
-        "To gather anecdotal evidence of how cats influence daily routines and well-being."
-      ],
-      "persona": "A curious and gentle veterinarian's assistant, keen to understand the human-animal bond.",
-      "createdAt": "2026-06-01T11:01:13.062Z"
+  "cases": {},
+  "patients": {
+    "PT-8842": {
+      "id": "PT-8842",
+      "name": "Lakshmi Bai",
+      "age": 58,
+      "sex": "Female",
+      "diabetesHistory": "Type 2 DM (11 years) • HbA1c 8.4%",
+      "cameraDevice": "Remidio NM-FOP",
+      "lastScreeningDate": "2025-03-12",
+      "phcLocation": "Telangana East PHC #04"
     },
-    "1780312686734": {
-      "id": "1780312686734",
-      "title": "Aam Ras Aficionados Survey",
-      "topic": "survey about aam rass",
-      "description": "how people are in love with aam ras and why , whats threre views about it \n",
-      "goals": [
-        "Understand the primary emotional drivers and reasons behind people's love for aam ras.",
-        "Identify the most cherished aspects and sensory experiences associated with consuming aam ras.",
-        "Explore variations in consumption habits and preferences related to aam ras across different demographics.",
-        "Gauge consumer perceptions of quality, authenticity, and potential improvements for aam ras products."
-      ],
-      "persona": "Enthusiastic and nostalgic food blogger, eager to uncover the heart and soul behind people's favorite mango preparations.",
-      "createdAt": "2026-06-01T11:18:06.734Z"
+    "PT-8843": {
+      "id": "PT-8843",
+      "name": "Ramesh Verma",
+      "age": 64,
+      "sex": "Male",
+      "diabetesHistory": "Type 2 DM (16 years) • HbA1c 9.1%",
+      "cameraDevice": "Forus 3nethra classic",
+      "lastScreeningDate": "2024-11-05",
+      "phcLocation": "Telangana East PHC #04"
     },
-    "1780320207880": {
-      "id": "1780320207880",
-      "title": "Cats & Remote Work: The Purr-fect Balance?",
-      "topic": " Feline-Human Dynamics and Remote Work Productivity",
-      "description": "We want to understand how owning a cat impacts the mental well-being and daily productivity of remote workers. We are looking to capture insights into common distractions (like walking on keyboards), emotional support benefits, and whether cat owners feel their pets reduce or increase work-related stress.",
-      "goals": [
-        "Identify the primary ways cats impact remote workers' mental well-being (both positive and negative).",
-        "Quantify the extent to which cats serve as distractions versus sources of comfort during the workday.",
-        "Understand the correlation between cat ownership and perceived levels of work-related stress among remote employees.",
-        "Gather specific examples and anecdotes of how cats influence remote work routines and productivity."
-      ],
-      "persona": "Empathetic and observant pet lover, with a keen interest in work-life balance. The interviewer should be curious, non-judgmental, and skilled at drawing out personal experiences and feelings.",
-      "createdAt": "2026-06-01T13:23:27.880Z"
+    "PT-8844": {
+      "id": "PT-8844",
+      "name": "Anitha Reddy",
+      "age": 49,
+      "sex": "Female",
+      "diabetesHistory": "Type 2 DM (5 years) • HbA1c 7.2%",
+      "cameraDevice": "Zeiss Visucam 500",
+      "lastScreeningDate": "First Screening",
+      "phcLocation": "Telangana East PHC #04"
     },
-    "1780320399889": {
-      "id": "1780320399889",
-      "title": "Dog Feeder Feedback",
-      "topic": "dog feader review ",
-      "description": "launched my dog feader program , now i want review",
-      "goals": [
-        "Understand user satisfaction with the new dog feeder program.",
-        "Identify key features users find most valuable.",
-        "Uncover pain points or areas for improvement in the dog feeder program.",
-        "Gather suggestions for future enhancements to the dog feeder program."
-      ],
-      "persona": "Friendly and enthusiastic product tester, eager to hear about new pet products and their experiences.",
-      "createdAt": "2026-06-01T13:26:39.889Z"
-    },
-    "1780320813682": {
-      "id": "1780320813682",
-      "title": "Dog Feeder User Feedback",
-      "topic": "Dog feader response ",
-      "description": "i have Installed the dof feaders in the locality i nedd its response ",
-      "goals": [
-        "Understand user satisfaction with the installed dog feeders.",
-        "Identify common issues or challenges encountered by users.",
-        "Gather suggestions for improving the dog feeder design or functionality.",
-        "Assess the perceived impact of the dog feeders on the local dog population and community."
-      ],
-      "persona": "Friendly and community-oriented local representative",
-      "createdAt": "2026-06-01T13:33:33.682Z"
-    },
-    "1782667176884": {
-      "id": "1782667176884",
-      "title": "Smart Feeder Insights",
-      "topic": "dog feeder ",
-      "description": "recently installed dog feeder in my locality i need survey to get its usage , spoilage and etc ",
-      "goals": [
-        "Understand current dog feeder usage patterns and frequency.",
-        "Identify common issues or challenges users face with their dog feeders, including spoilage or malfunction.",
-        "Gauge user satisfaction with existing dog feeder features and performance.",
-        "Gather suggestions for improvements or desired new features in dog feeders."
-      ],
-      "persona": "Curious and observant community researcher, eager to understand how new pet technology is being adopted and how it impacts daily routines.",
-      "createdAt": "2026-06-28T17:19:36.884Z"
-    },
-    "1783270096238": {
-      "id": "1783270096238",
-      "title": "Community Feedback: Public Dog Feeder",
-      "topic": "Public Dog Feeder survey",
-      "description": "Hey! My organization installed a public dog feeder for street dogs in the area. We want to take a quick survey to see how the local community feels about it.\"\n\nWhat we want to find out (Our Goals):\n\nWho is answering: Are they local residents, shopkeepers, or just people walking by?\n\nDog Behavior: Are the street dogs calmer now, or are they gathering in scary packs?\n\nCleanliness: Is the area around the feeder clean, or is it creating a mess and attracting pests?\n\nThe Verdict: Do people support this initiative, do they want the feeder moved to a better spot, or do they want it removed completely?",
-      "goals": [
-        "Identify the demographic profile of survey respondents (residents, shopkeepers, passersby).",
-        "Assess perceived changes in street dog behavior and congregation patterns.",
-        "Evaluate the impact of the feeder on local cleanliness and pest presence.",
-        "Gauge overall community sentiment towards the public dog feeder initiative, including support, relocation, or removal."
-      ],
-      "persona": "Friendly and approachable community liaison, genuinely interested in local opinions.",
-      "createdAt": "2026-07-05T16:48:16.238Z"
-    }
-  },
-  "sessions": {
-    "1783270511011": {
-      "id": "1783270511011",
-      "surveyId": "1783270096238",
-      "messages": [
-        {
-          "id": "1783270198888",
-          "role": "user",
-          "content": "hi "
-        },
-        {
-          "id": "1783270203216",
-          "role": "assistant",
-          "content": "Arre, hello ji! Kaise hain aap? 👋\n\nI'm here from the local community team. We've put up a little something for our street dog friends recently, and we'd love to hear your thoughts.\n\nTo start, can you tell me, are you a local resident, a shopkeeper nearby, or just passing through today? This will help us understand who we're chatting with! 😊"
-        },
-        {
-          "id": "1783270230659",
-          "role": "user",
-          "content": "i am a local resident"
-        },
-        {
-          "id": "1783270231641",
-          "role": "assistant",
-          "content": "Great to hear you"
-        },
-        {
-          "id": "1783270239891",
-          "role": "user",
-          "content": "yes"
-        },
-        {
-          "id": "1783270241318",
-          "role": "assistant",
-          "content": "Thank you so much for sharing that! It's really helpful to know.\n\nNow, a little about the dog feeder we've installed. Since it's been put up, have you noticed any changes in how the street dogs are behaving? Are they seeming calmer, or perhaps gathering in bigger groups? What's your observation, ji?"
-        },
-        {
-          "id": "1783270301342",
-          "role": "user",
-          "content": "they are lot more calm and healthy also beahving lot better with local people "
-        },
-        {
-          "id": "1783270302541",
-          "role": "assistant",
-          "content": "That's absolutely"
-        },
-        {
-          "id": "1783270314324",
-          "role": "user",
-          "content": "yes"
-        },
-        {
-          "id": "1783270316016",
-          "role": "assistant",
-          "content": "Oh, that's wonderful news to hear, ji! It sounds like the feeder is making a real positive difference for the dogs and how they interact with everyone. Thanks for letting us know!\n\nNow, shifting gears a tiny bit, how about the area *around* the dog feeder itself? Have you noticed if it's staying clean, or is it perhaps getting a bit messy and attracting any unwanted guests like pests? What's the cleanliness situation like, in your opinion?"
-        },
-        {
-          "id": "1783270394508",
-          "role": "user",
-          "content": "i have seen that most of the area around the dog feader is messy , yet that food too is beign licked off y the dogs , but cleaning of the bowls is necessary "
-        },
-        {
-          "id": "1783270395734",
-          "role": "assistant",
-          "content": "Thanks for being so honest about that, ji. It's really important feedback! We definitely want to make sure it's not causing any mess.\n\nSo, considering everything you've observed – the dogs' behaviour and the cleanliness around the feeder – what are your overall thoughts on this public dog feeder initiative? Are you generally in support of it, do you think it should be moved to a different spot, or would you prefer it to be removed altogether?"
-        },
-        {
-          "id": "1783270476871",
-          "role": "user",
-          "content": "i have satsified and happy that the dogs are beign feed , but postion of the feeders are not good , they must be placed in area such as gardens and allys away from road "
-        },
-        {
-          "id": "1783270479925",
-          "role": "assistant",
-          "content": "That's incredibly valuable feedback, ji! It's great to hear you're happy the dogs are being fed – that's a big part of it. And your suggestion about placing them in gardens or alleys, away from the main roads, makes a lot of sense for better management and cleanliness.\n\nThank you so much for taking the time to share your thoughts with me today. Your opinions are super helpful as we figure out the best way forward. Have a wonderful day! 😊"
-        }
-      ],
-      "extractedPoints": {
-        "Identify the demographic profile of survey respondents (residents, shopkeepers, passersby)": "The respondent identifies as a local resident.",
-        "Assess perceived changes in street dog behavior and congregation patterns": "The respondent observed that the street dogs are much calmer, healthier, and behaving better with local people.",
-        "Evaluate the impact of the feeder on local cleanliness and pest presence": "The respondent noted that the area around the feeder is often messy, although the dogs do eat the food, and suggested that cleaning the bowls is necessary.",
-        "Gauge overall community sentiment towards the public dog feeder initiative, including support, relocation, or removal": "The respondent is satisfied and happy that the dogs are being fed but believes the feeder's position is not ideal and suggests relocation to areas like gardens and alleys away from roads."
-      },
-      "completed": true,
-      "createdAt": "2026-07-05T16:55:11.011Z"
-    },
-    "1783270801910": {
-      "id": "1783270801910",
-      "surveyId": "1783270096238",
-      "messages": [
-        {
-          "id": "1783270616939",
-          "role": "user",
-          "content": "hi"
-        },
-        {
-          "id": "1783270617918",
-          "role": "assistant",
-          "content": "Hello there! Namaste! 👋  It's so nice to connect with you. I'm here from the local community group, and we're really keen to hear what folks like you think about something new we've put up.\n\nTo start, could you tell me, are you a local resident, do you own a shop nearby, or are you just passing through the area today? 😊"
-        },
-        {
-          "id": "1783270636988",
-          "role": "user",
-          "content": "shop owner "
-        },
-        {
-          "id": "1783270637992",
-          "role": "assistant",
-          "content": "Great to know! Thank you for taking the time out from your shop. We really appreciate your input as a local business owner.\n\nNow, about the dog feeder we've set"
-        },
-        {
-          "id": "1783270648370",
-          "role": "user",
-          "content": "yes"
-        },
-        {
-          "id": "1783270649358",
-          "role": "assistant",
-          "content": "Perfect! So, thinking about the street dogs in our neighbourhood since the feeder's been there, have you noticed any change in their behaviour? Are they seeming calmer, or perhaps gathering more often? We want to make sure everyone feels safe and comfortable."
-        },
-        {
-          "id": "1783270703318",
-          "role": "user",
-          "content": "i have seen them calm lately , they used to bark near my shop asking me for the treat , now they do that less often "
-        },
-        {
-          "id": "1783270704839",
-          "role": "assistant",
-          "content": "Oh, that's wonderful to hear! It's really encouraging that you've noticed them being calmer and barking less near your shop. That's exactly the kind of positive change we were hoping for. Thank you for sharing that!\n\nNow, moving on to the next thing, how do you feel about the cleanliness around the dog feeder area? Have you noticed it staying tidy, or is it causing any mess or attracting more pests lately?"
-        },
-        {
-          "id": "1783270752876",
-          "role": "user",
-          "content": "it is not causing any mess , but food gets spoil in some of the bowls and dogs dont eat them , makes the area messy "
-        },
-        {
-          "id": "1783270753760",
-          "role": "assistant",
-          "content": "Thanks for pointing that out! It's really helpful to know that it's not creating a general mess, but that the spoiled food is a bit of an issue. We definitely don't want that happening.\n\nWe're almost at the end of our chat! Based on everything you've seen and experienced, what do you think about the public dog feeder overall? Are you generally in favour of it, or do you think it might be better if we moved it somewhere else, or perhaps even removed it?"
-        },
-        {
-          "id": "1783270795121",
-          "role": "user",
-          "content": "i am in support of the feeder , position is good"
-        },
-        {
-          "id": "1783270797270",
-          "role": "assistant",
-          "content": "That's fantastic to hear! I'm so glad you're in support of the feeder and think the current spot is good. Your feedback is super valuable, especially coming from a local shop owner.\n\nThank you so much for taking the time to share your thoughts with me today. We really appreciate you helping us out! Have a wonderful rest of your day! 😊"
-        }
-      ],
-      "extractedPoints": {
-        "Identify the demographic profile of survey respondents (residents, shopkeepers, passersby).": "The respondent is a shop owner.",
-        "Assess perceived changes in street dog behavior and congregation patterns.": "The respondent has noticed the street dogs barking less and appearing calmer, no longer frequently approaching the shop for treats.",
-        "Evaluate the impact of the feeder on local cleanliness and pest presence.": "The respondent stated the feeder is not causing a general mess, but acknowledged that spoiled food in some bowls leads to dogs not eating it, which then makes the area messy.",
-        "Gauge overall community sentiment towards the public dog feeder initiative, including support, relocation, or removal.": "The respondent is in support of the feeder and believes its current position is good."
-      },
-      "completed": true,
-      "createdAt": "2026-07-05T17:00:01.910Z"
+    "PT-8845": {
+      "id": "PT-8845",
+      "name": "Kishore Kumar",
+      "age": 52,
+      "sex": "Male",
+      "diabetesHistory": "Type 2 DM (8 years) • HbA1c 7.8%",
+      "cameraDevice": "Topcon TRC-NW400",
+      "lastScreeningDate": "2025-01-20",
+      "phcLocation": "Telangana East PHC #04"
     }
   }
 }

@@ -277,7 +277,7 @@ export const FundusCanvas: React.FC<FundusCanvasProps> = ({
 
           let strokeColor = '#38bdf8';
           let glowColor = 'rgba(56, 189, 248, 0.4)';
-          let badgeBg = 'rgba(15, 23, 42, 0.92)';
+          const badgeBg = 'rgba(15, 23, 42, 0.92)';
           if (finding.name === 'Microaneurysms') {
             strokeColor = '#f43f5e'; // Bright Rose Red
             glowColor = 'rgba(244, 63, 94, 0.5)';

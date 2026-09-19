@@ -43,6 +43,15 @@ This creates an **Explainable, Deterministic, and Trustworthy** clinical tool.
 
 ## 🔄 3. End-to-End System Flowchart
 
+### Simplified Technical Flow
+1. **Input**: A doctor or technician uploads a raw retinal photograph via the Next.js web interface.
+2. **Transfer**: The image is securely transmitted to the Node.js backend API and temporarily staged.
+3. **Preprocessing (Python)**: Computer vision algorithms automatically locate the retina, crop out useless black borders, and apply lighting standardization (Ben Graham filtering) so dark or blurry images don't confuse the AI.
+4. **Deep Learning Inference**: The preprocessed image is fed into a highly trained PyTorch Convolutional Neural Network (EfficientNet-B2) which outputs a raw Diabetic Retinopathy severity prediction.
+5. **Explainability & Auditing**: The system generates a topographical heatmap (Grad-CAM) to see exactly *where* the AI found disease. A Deterministic Clinical Engine then maps these lesions to retinal quadrants and strictly applies ETDRS medical rules to verify or override the AI's prediction.
+6. **Output & Visualization**: The final audited grade, along with mathematically aligned lesion coordinates, is returned to the frontend. The UI renders a sophisticated, multi-viewport dashboard showing exactly what was found and where.
+
+### Detailed Sequence Diagram
 ```mermaid
 sequenceDiagram
     participant User as Doctor / Tech

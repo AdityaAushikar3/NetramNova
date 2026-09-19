@@ -110,12 +110,18 @@ STAGE 5: CSME FOVEAL PROXIMITY & REFERRAL TRIAGE
         * Grade 0, Grade 1, or Grade 2 without macular threat.
         * Prescribes lifestyle counseling and 6 to 12 month follow-up screening.
 
-STAGE 6: OFFLINE EDGE DEPLOYMENT & EDGE SYNC
+STAGE 6: OFFLINE EDGE DEPLOYMENT, MATLAB VERIFICATION & EDGE SYNC
 --------------------------------------------------------------------------------
-• Universal CPU Deployment:
-    - Models exported to ONNX format with INT8 dynamic post-training quantization.
+• Universal Edge & MATLAB Deployment:
+    - Models exported to ONNX format (`outputs/onnx/classifier.onnx`) with FP32 and INT8 quantization.
     - Runs inference in < 1.5 seconds per image on standard dual-core PHC laptops.
     - Zero cloud or internet dependency during the screening session.
+• Native MathWorks Toolboxes Execution (`ml_pipeline/matlab/`):
+    - MATLAB Deep Learning Toolbox: Lossless ONNX import (`importNetworkFromONNX`) executing native
+      inference, softmax probability estimation, and calibrated operating threshold tau = 0.40.
+    - MATLAB Image Processing Toolbox: Automated FOV masking, Laplacian focus variance calculation,
+      glare saturation analysis, and Ben Graham local illumination correction.
+    - Simulink Queue Model: Simulates 100,000+ patient annual screening cohort across 50 PHCs.
 • Store-and-Forward Edge Synchronization:
     - AES-256 encrypted SQLite database stores patient demographics and tickets locally.
     - Background sync daemon automatically pushes encrypted packages to district

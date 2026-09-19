@@ -40,6 +40,17 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
     return MOCK_PATIENTS[0];
   });
 
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [cameraDevice, setCameraDevice] = useState<string>('Remidio NM-FOP');
+  const [customImageUrl, setCustomImageUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
+
+  // Processing state machine: 'idle' | 'processing' | 'completed'
+  const [stage, setStage] = useState<'idle' | 'processing' | 'completed'>('idle');
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
+  const [activeCase, setActiveCase] = useState<ScreeningCase>(MOCK_CASES[0]);
+
   useEffect(() => {
     if (initialPatientId) {
       const match = patientsList.find((p) => p.id === initialPatientId);
@@ -53,17 +64,6 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, i
       }
     }
   }, [initialPatientId, patientsList]);
-
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [cameraDevice, setCameraDevice] = useState<string>('Remidio NM-FOP');
-  const [customImageUrl, setCustomImageUrl] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
-
-  // Processing state machine: 'idle' | 'processing' | 'completed'
-  const [stage, setStage] = useState<'idle' | 'processing' | 'completed'>('idle');
-  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
-  const [activeCase, setActiveCase] = useState<ScreeningCase>(MOCK_CASES[0]);
 
   // Live Step 2 Quality Metrics state
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics>({

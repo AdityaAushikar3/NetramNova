@@ -44,7 +44,7 @@ export const TechExplanationModal: React.FC<TechExplanationModalProps> = ({ isOp
               1. The Flaw of Generic CLAHE Alone
             </h4>
             <p className="text-xs text-slate-300">
-              Standard CLAHE forces contrast amplification in local tiles indiscriminately. In fundus photography, camera flash falloff creates dark peripheral edges. Generic CLAHE amplifies sensor noise in peripheral shadows into false "speckles", causing downstream AI networks to misclassify noise as early-stage <strong>microaneurysms</strong>.
+              Standard CLAHE forces contrast amplification in local tiles indiscriminately. In fundus photography, camera flash falloff creates dark peripheral edges. Generic CLAHE amplifies sensor noise in peripheral shadows into false &quot;speckles&quot;, causing downstream AI networks to misclassify noise as early-stage <strong>microaneurysms</strong>.
             </p>
           </div>
 
@@ -55,7 +55,7 @@ export const TechExplanationModal: React.FC<TechExplanationModalProps> = ({ isOp
               2. Ben Graham Local Frequency Subtraction (I_std = 4·I - 4·GaussianBlur(σ=10) + 128)
             </h4>
             <p className="text-xs text-slate-300 mb-2">
-              NetramNova employs <strong>Ben Graham Color Standardization</strong> (1st Place Kaggle DR / EyePACS Standard). By subtracting a wide Gaussian blur ($\sigma=10$), low-frequency camera vignetting and flash gradients are completely wiped out. High-frequency lesion boundaries are amplified $4\times$, and normal retinal tissue is re-centered to a uniform median gray ($128$) across all camera brands.
+              NetramNova employs <strong>Ben Graham Color Standardization</strong> (Gold-Standard Retinal Illumination Normalization). By subtracting a wide Gaussian blur ($\sigma=10$), low-frequency camera vignetting and flash gradients are completely wiped out. High-frequency lesion boundaries are amplified $4\times$, and normal retinal tissue is re-centered to a uniform median gray ($128$) across all camera brands.
             </p>
             <div className="flex items-center gap-2 p-2 bg-slate-900 rounded font-mono text-xs text-slate-400 border border-slate-800">
               <FileText className="w-3.5 h-3.5 text-blue-400 shrink-0" />

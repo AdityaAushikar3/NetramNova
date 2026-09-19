@@ -25,7 +25,7 @@ export async function PATCH(
       );
     }
 
-    const updated = updateCase(id, allowedPatch as Parameters<typeof updateCase>[1]);
+    const updated = await updateCase(id, allowedPatch as Parameters<typeof updateCase>[1]);
     if (!updated) {
       return NextResponse.json({ error: `Case ${id} not found` }, { status: 404 });
     }

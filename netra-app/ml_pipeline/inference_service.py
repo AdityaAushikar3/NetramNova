@@ -105,19 +105,27 @@ def init_model(ckpt_path: str = "ml_pipeline/outputs/checkpoints/best_classifier
         print("[NetramNova Service] Model and Grad-CAM successfully initialized!", file=sys.stderr)
 
 
-def crop_fundus_circle(img: np.ndarray, tol: int = 7) -> np.ndarray:
-    """Crops empty black background around circular retinal boundary."""
+def crop_fundus_circle(img: np.ndarray, tol: int = 7) -> tuple[np.ndarray, int, int]:
+    """Crops empty black background around circular retinal boundary. Returns (cropped_img, x_offset, y_offset)"""
     if img.ndim == 2:
         mask = img > tol
-        return img[np.ix_(mask.any(1), mask.any(0))]
+        rows = np.any(mask, axis=1)
+        cols = np.any(mask, axis=0)
+        if not np.any(rows) or not np.any(cols): return img, 0, 0
+        ymin, ymax = np.where(rows)[0][[0, -1]]
+        xmin, xmax = np.where(cols)[0][[0, -1]]
+        return img[ymin:ymax+1, xmin:xmax+1], xmin, ymin
+        
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     mask = gray > tol
     if not mask.any():
-        return img
-    check_shape = img[:, :, 0][np.ix_(mask.any(1), mask.any(0))].shape[0]
-    if check_shape == 0:
-        return img
-    return img[np.ix_(mask.any(1), mask.any(0))]
+        return img, 0, 0
+    
+    rows = np.any(mask, axis=1)
+    cols = np.any(mask, axis=0)
+    ymin, ymax = np.where(rows)[0][[0, -1]]
+    xmin, xmax = np.where(cols)[0][[0, -1]]
+    return img[ymin:ymax+1, xmin:xmax+1], xmin, ymin
 
 
 def extract_real_lesions_and_quadrants(img_bgr: np.ndarray, cam_map: np.ndarray | None = None) -> tuple[QuadrantCounts, list[tuple[int, int, int]]]:
@@ -183,13 +191,19 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
     quality_eval = check_quality(img_bgr)
     gradable = quality_eval["passed"]
     quality_tier = quality_eval.get("quality_tier", "GREEN")
+    
+    if not gradable:
+        return {
+            "error": f"Image Quality Rejected: {quality_eval.get('technician_feedback', 'Ungradable image')}. Please recapture."
+        }
+
     focus_score = quality_eval["focus"]
     glare_ratio = quality_eval["glare_pct"]
     fov_ratio = quality_eval["fov_pct"]
 
     # 3. Ben Graham Illumination Normalization (Matching Training Pipeline Domain)
     # Circle crop to isolate fundus circle and eliminate outer black borders
-    cropped_bgr = crop_fundus_circle(img_bgr)
+    cropped_bgr, x_offset, y_offset = crop_fundus_circle(img_bgr)
     img_512 = cv2.resize(cropped_bgr, (512, 512), interpolation=cv2.INTER_AREA)
 
     # Ben Graham local frequency subtraction: 4*I - 4*GaussianBlur(I, sigma=512/30) + 128
@@ -211,10 +225,10 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
 
     # 5. Grad-CAM Heatmap Generation (Grounded in deep model attention)
     cam_heatmap = GRADCAM.generate(tensor, target_class=raw_pred)
-    overlay_bgr = visualize_gradcam(img_bgr, cam_heatmap, alpha=0.45)
+    overlay_bgr = visualize_gradcam(cropped_bgr, cam_heatmap, alpha=0.45)
 
     # 6. Real Lesion Extraction & Dynamic ETDRS 4-2-1 Clinical Consensus
-    q_counts, detected_lesions = extract_real_lesions_and_quadrants(img_bgr, cam_heatmap)
+    q_counts, detected_lesions = extract_real_lesions_and_quadrants(cropped_bgr, cam_heatmap)
 
     audited_grade = raw_pred
     rescue_note = None
@@ -246,7 +260,7 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
     # If grade was upgraded, update Grad-CAM for final grade
     if final_grade != raw_pred:
         cam_heatmap = GRADCAM.generate(tensor, target_class=final_grade)
-        overlay_bgr = visualize_gradcam(img_bgr, cam_heatmap, alpha=0.45)
+        overlay_bgr = visualize_gradcam(cropped_bgr, cam_heatmap, alpha=0.45)
 
     # Encode Preprocessed Model Input (512x512 Ben Graham) to base64 JPEG
     _, preproc_buffer = cv2.imencode(".jpg", standardized_bgr, [cv2.IMWRITE_JPEG_QUALITY, 90])
@@ -257,11 +271,12 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
     gradcam_base64 = "data:image/jpeg;base64," + base64.b64encode(buffer).decode("utf-8")
 
     # 7. Clinical Triage Mapping & Dynamic Lesion Coordinates
+    h_crop, w_crop = cropped_bgr.shape[:2]
     scaled_coords = [
         {
-            "x": int(cx * w_orig / 512),
-            "y": int(cy * h_orig / 512),
-            "radius": max(5, int(r * w_orig / 512))
+            "x": int(cx * w_crop / 512) + x_offset,
+            "y": int(cy * h_crop / 512) + y_offset,
+            "radius": max(5, int(r * w_crop / 512))
         }
         for cx, cy, r in detected_lesions[:16]
     ]
@@ -348,6 +363,10 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
                 "coords": scaled_coords[:12]
             }
         ]
+
+    if calibrated_referable and final_grade < 2:
+        triage_tier = "Tier 2 (Priority Review)"
+        recall_advice = "6 Months"
 
     confidence_label = "High" if conf_score >= 80.0 else ("Medium" if conf_score >= 60.0 else "Low")
     csme_detected = bool(final_grade >= 2 and probs[2] > 0.25)
@@ -465,7 +484,7 @@ def start_server(port: int = 5000):
     print(f" Pre-warmed Checkpoint: best_classifier.pt on {DEVICE}")
     print(f" Ready to receive screening scans from Next.js!")
     print("=" * 55)
-    app.run(host="127.0.0.1", port=port, threaded=True)
+    app.run(host="127.0.0.1", port=port, threaded=False)
 
 
 if __name__ == "__main__":

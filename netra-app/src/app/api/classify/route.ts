@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     // 1. Try warm microservice on port 5000 first (fastest, ~80ms)
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // Increased to 30s
 
       let fetchOptions: RequestInit;
       if (imageBuffer) {
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     console.error('[API /api/classify Error]', error);
     return NextResponse.json(
-      { error: 'Classification failed', details: error?.message || String(error) },
+      { error: 'Classification failed', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

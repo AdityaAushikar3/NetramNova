@@ -58,8 +58,8 @@ function loadDb(): DatabaseSchema {
       patients: parsed.patients ?? {},
     };
   } catch (error) {
-    console.error('[NetramNova DB] Error loading database:', error);
-    return { ...EMPTY_DB };
+    console.error('[NetramNova DB] Critical Error loading database. Halting to prevent data wipe:', error);
+    throw new Error(`Failed to load database from ${DB_FILE_PATH}: ${error}`);
   }
 }
 

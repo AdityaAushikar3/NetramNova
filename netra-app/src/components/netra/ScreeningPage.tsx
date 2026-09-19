@@ -140,15 +140,16 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, o
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      if (customImageUrl && customImageUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(customImageUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setCustomImageUrl(url);
-      setActiveCase((prev) => ({
-        ...prev,
-        imageUrl: url,
-      }));
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Url = event.target?.result as string;
+        setCustomImageUrl(base64Url);
+        setActiveCase((prev) => ({
+          ...prev,
+          imageUrl: base64Url,
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -191,6 +192,10 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, o
       }
 
       const data = await apiRes.json();
+      
+      if (data.error || data.icdrLevel === undefined) {
+        throw new Error(data.error || data.details || 'Inference pipeline failed to return a valid result.');
+      }
 
       clearInterval(interval);
       setCurrentStepIndex(processingSteps.length - 1);
@@ -207,15 +212,15 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, o
           synced: false,
           doctorReviewStatus: 'pending',
           result: {
-            diagnosis: data.diagnosis || 'Retinal Assessment Complete',
-            icdrLevel: data.icdrLevel ?? 0,
-            severity: data.severity || 'normal',
-            confidence: data.confidence || 'High',
-            confidenceScore: data.confidenceScore ?? 85,
-            triageTier: data.triageTier || 'Tier 1 (Auto-Cleared)',
+            diagnosis: data.diagnosis,
+            icdrLevel: data.icdrLevel,
+            severity: data.severity,
+            confidence: data.confidence,
+            confidenceScore: data.confidenceScore,
+            triageTier: data.triageTier,
             findings: data.findings || [],
-            progressionRisk: data.progressionRisk ?? 10,
-            recallAdvice: data.recallAdvice || '12 Months',
+            progressionRisk: data.progressionRisk,
+            recallAdvice: data.recallAdvice,
             csmeThreatDetected: data.csmeThreatDetected,
             csmeFoveaDistanceDiscDiameters: data.csmeFoveaDistanceDiscDiameters,
             gradcamOverlay: data.gradcamOverlay,

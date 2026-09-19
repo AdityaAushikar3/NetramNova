@@ -85,6 +85,29 @@ sequenceDiagram
     UI->>User: Renders Multi-Viewport Dashboard
 ```
 
+### System Architecture Flowchart
+```mermaid
+graph TD
+    A[Doctor Uploads Image] --> B(Next.js Frontend)
+    B --> C{Node.js API Route}
+    C -->|Spawns Child Process| D[Python ML Pipeline]
+    
+    subgraph Python Pipeline
+        D --> E[Image Preprocessing]
+        E -->|Circular Crop & Ben Graham| F[PyTorch EfficientNet-B2]
+        F -->|Raw Prediction| G[Grad-CAM Generator]
+        G -->|Heatmap| H[Clinical Rule Engine]
+        H -->|ETDRS 4-Quadrant Audit| I[Final Audited Grade & Coordinates]
+    end
+    
+    I -->|JSON Response| C
+    C --> J(Multi-Viewport Canvas Dashboard)
+    J --> K[Raw View]
+    J --> L[Preprocessed View]
+    J --> M[Grad-CAM View]
+    J --> N[Structural Red-Free View]
+```
+
 ---
 
 ## 🔬 4. Minute Details of the ML Pipeline

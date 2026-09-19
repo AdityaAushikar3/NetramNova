@@ -97,8 +97,8 @@ export async function POST(req: NextRequest) {
       ], {
         maxBuffer: 50 * 1024 * 1024,
         // API-1 FIX: Add timeout so a hung Python process doesn't block the server indefinitely.
-        // 2 minutes is generous for cold-start CPU inference; GPU is typically ~5s.
-        timeout: 120000,
+        // 5 minutes is generous for cold-start CPU inference or heavy system load.
+        timeout: 300000,
       });
 
       const rawOut = stdout.trim();
@@ -116,10 +116,14 @@ export async function POST(req: NextRequest) {
         } catch (_) {}
       }
     }
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('[API /api/classify Error]', error);
+    let details = error instanceof Error ? error.message : String(error);
+    if (error.stdout) details += `\nSTDOUT: ${error.stdout}`;
+    if (error.stderr) details += `\nSTDERR: ${error.stderr}`;
+
     return NextResponse.json(
-      { error: 'Classification failed', details: error instanceof Error ? error.message : String(error) },
+      { error: 'Classification failed', details },
       { status: 500 }
     );
   }

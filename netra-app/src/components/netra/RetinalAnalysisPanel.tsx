@@ -274,13 +274,18 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
                   After: Model Input (512x512 Tensor)
                 </span>
               </div>
-              <div className="relative rounded-lg overflow-hidden border border-emerald-900/40 bg-slate-950 flex items-center justify-center p-2 min-h-[380px]">
-                <img
-                  src={result.preprocessedImage || caseData.imageUrl}
-                  alt="Model Input Preprocessed 512x512"
-                  className="max-h-[460px] w-auto rounded border border-slate-800 shadow-md object-contain"
+              <div className="relative rounded-lg overflow-hidden border border-emerald-900/40 bg-slate-950 flex flex-col items-center justify-center p-2 min-h-[380px]">
+                <FundusCanvas
+                  mode="colour"
+                  findings={result.findings}
+                  selectedFindingId={selectedFindingId}
+                  onSelectFinding={setSelectedFindingId}
+                  imageUrl={result.preprocessedImage || caseData.imageUrl}
+                  activeDiseaseFilter={activeDiseaseFilter}
+                  onSelectDiseaseFilter={setActiveDiseaseFilter}
+                  useCropCoords={true}
                 />
-                <div className="absolute bottom-4 right-4 bg-slate-900/90 backdrop-blur border border-slate-700 px-2.5 py-1 rounded text-[11px] font-mono text-slate-300">
+                <div className="absolute bottom-4 right-4 bg-slate-900/90 backdrop-blur border border-slate-700 px-2.5 py-1 rounded text-[11px] font-mono text-slate-300 pointer-events-none">
                   512 × 512 × 3 • ImageNet Normalized
                 </div>
               </div>
@@ -294,11 +299,16 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
                 <span>Convolutional Class Activation Saliency Map</span>
                 <span className="text-purple-400 font-semibold">Grad-CAM (Conv Head)</span>
               </div>
-              <div className="relative rounded-lg overflow-hidden border border-purple-900/60 bg-slate-950 flex items-center justify-center p-3">
-                <img
-                  src={result.gradcamOverlay}
-                  alt="Grad-CAM Saliency Heatmap"
-                  className="max-h-[500px] w-auto rounded shadow-lg object-contain"
+              <div className="relative rounded-lg overflow-hidden border border-purple-900/60 bg-slate-950 flex flex-col items-center justify-center p-3 min-h-[380px]">
+                <FundusCanvas
+                  mode="colour"
+                  findings={result.findings}
+                  selectedFindingId={selectedFindingId}
+                  onSelectFinding={setSelectedFindingId}
+                  imageUrl={result.gradcamOverlay || caseData.imageUrl}
+                  activeDiseaseFilter={activeDiseaseFilter}
+                  onSelectDiseaseFilter={setActiveDiseaseFilter}
+                  useCropCoords={true}
                 />
               </div>
             </div>
@@ -319,6 +329,7 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
                 imageUrl={caseData.imageUrl}
                 activeDiseaseFilter={activeDiseaseFilter}
                 onSelectDiseaseFilter={setActiveDiseaseFilter}
+                useCropCoords={false}
               />
             </div>
           )}

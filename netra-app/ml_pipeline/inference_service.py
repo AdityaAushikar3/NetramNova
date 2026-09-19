@@ -249,12 +249,16 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
     gradcam_base64 = "data:image/jpeg;base64," + base64.b64encode(buffer).decode("utf-8")
 
     # 7. Clinical Triage Mapping & Dynamic Lesion Coordinates
+    h_orig, w_orig = img_bgr.shape[:2]
     h_crop, w_crop = cropped_bgr.shape[:2]
     scaled_coords = [
         {
-            "x": int(cx * w_crop / 512) + x_offset,
-            "y": int(cy * h_crop / 512) + y_offset,
-            "radius": max(5, int(r * w_crop / 512))
+            "x": round(float((cx * w_crop / 512) + x_offset) / w_orig * 100.0, 2),
+            "y": round(float((cy * h_crop / 512) + y_offset) / h_orig * 100.0, 2),
+            "radius": round(float(max(5, int(r * w_crop / 512))) / w_orig * 100.0, 2),
+            "cropX": round(float(cx) / 512.0 * 100.0, 2),
+            "cropY": round(float(cy) / 512.0 * 100.0, 2),
+            "cropRadius": round(float(r) / 512.0 * 100.0, 2)
         }
         for cx, cy, r in detected_lesions[:16]
     ]
@@ -275,7 +279,7 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
             "severity": "mild",
             "category": "structural",
             "locationDescription": f"Detected {len(detected_lesions)} microaneurysms: Sup={q_counts.superior}, Inf={q_counts.inferior}, Nas={q_counts.nasal}, Temp={q_counts.temporal}",
-            "coords": scaled_coords[:4] if scaled_coords else [{"x": int(w_orig * 0.55), "y": int(h_orig * 0.48), "radius": 8}]
+            "coords": scaled_coords[:4] if scaled_coords else [{"x": 55.0, "y": 48.0, "radius": 2.0, "cropX": 55.0, "cropY": 48.0, "cropRadius": 2.0}]
         }]
     elif final_grade == 2:
         triage_tier = "Tier 2 (Priority Review)"
@@ -483,9 +487,9 @@ if __name__ == "__main__":
         try:
             with contextlib.redirect_stdout(sys.stderr):
                 res = run_pipeline_on_image(image_path=args.image)
-            print(json.dumps(res))
+            print(json.dumps(res, ensure_ascii=True), flush=True)
         except Exception as e:
-            print(json.dumps({"error": str(e), "type": type(e).__name__}))
+            print(json.dumps({"error": str(e), "type": type(e).__name__}, ensure_ascii=True), flush=True)
             sys.exit(1)
     else:
         start_server(port=args.port)

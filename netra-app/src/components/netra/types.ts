@@ -26,7 +26,7 @@ export interface RetinalFinding {
   severity: 'mild' | 'moderate' | 'severe';
   category: 'structural' | 'colour';
   locationDescription: string;
-  coords: { x: number; y: number; radius: number }[];
+  coords: { x: number; y: number; radius: number; cropX?: number; cropY?: number; cropRadius?: number }[];
 }
 
 export interface Patient {

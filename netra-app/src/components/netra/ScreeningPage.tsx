@@ -188,7 +188,18 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, o
       });
 
       if (!apiRes.ok) {
-        throw new Error(`Inference API returned status: ${apiRes.status}`);
+        let errorMsg = `Inference API returned status: ${apiRes.status}`;
+        try {
+          const errData = await apiRes.json();
+          if (errData.details) {
+            errorMsg += ` - ${errData.details}`;
+          } else if (errData.error) {
+            errorMsg += ` - ${errData.error}`;
+          }
+        } catch (e) {
+          // ignore json parse error
+        }
+        throw new Error(errorMsg);
       }
 
       const data = await apiRes.json();
@@ -273,7 +284,7 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({ onCaseCompleted, o
   // but the user should be prompted to upload a real image.
   const currentPreviewUrl = customImageUrl || null;
 
-  const filteredPatients = patientsList.filter(
+  const filteredPatients = currentPatients.filter(
     (p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.id.toLowerCase().includes(searchQuery.toLowerCase())

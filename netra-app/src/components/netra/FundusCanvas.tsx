@@ -13,17 +13,19 @@ interface FundusCanvasProps {
   imageUrl?: string;
   activeDiseaseFilter?: DiseaseFilterType;
   onSelectDiseaseFilter?: (filter: DiseaseFilterType) => void;
+  useCropCoords?: boolean;
 }
 
 export const FundusCanvas: React.FC<FundusCanvasProps> = ({
   mode,
-  findings,
+  findings = [],
   selectedFindingId,
   onSelectFinding,
   showOverlays = true,
   imageUrl = '/samples/moderate_dr.jpg',
   activeDiseaseFilter = 'all',
   onSelectDiseaseFilter,
+  useCropCoords = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -269,9 +271,14 @@ export const FundusCanvas: React.FC<FundusCanvasProps> = ({
         const isSelected = selectedFindingId === finding.id;
 
         finding.coords.forEach((c) => {
-          // Normalize coordinate to retinal circle percentage [0, 100] (handles both 512px and 0-100% inputs)
-          const normX = c.x > 100 ? (c.x / 512) * 100 : c.x;
-          const normY = c.y > 100 ? (c.y / 512) * 100 : c.y;
+          // Use crop coordinates if requested and available, else use raw coordinates
+          const cX = useCropCoords && c.cropX !== undefined ? c.cropX : c.x;
+          const cY = useCropCoords && c.cropY !== undefined ? c.cropY : c.y;
+          const cR = useCropCoords && c.cropRadius !== undefined ? c.cropRadius : c.radius;
+
+          // Normalize coordinate to retinal circle percentage [0, 100] (fallback for legacy mock data)
+          const normX = cX > 100 ? (cX / 512) * 100 : cX;
+          const normY = cY > 100 ? (cY / 512) * 100 : cY;
           const px = cx + (normX - 50) * ((radius * 2) / 100);
           const py = cy + (normY - 50) * ((radius * 2) / 100);
 
@@ -297,7 +304,7 @@ export const FundusCanvas: React.FC<FundusCanvasProps> = ({
           targetCtx.lineWidth = (isSelected ? 3.0 : 2.0) * scaleMultiplier;
           targetCtx.setLineDash(isSelected ? [] : [5, 3]);
 
-          const boxSize = Math.max(22, (c.radius * 3.2 + 10)) * scaleMultiplier;
+          const boxSize = Math.max(22, (cR * 3.2 + 10)) * scaleMultiplier;
           targetCtx.strokeRect(px - boxSize / 2, py - boxSize / 2, boxSize, boxSize);
           targetCtx.setLineDash([]);
           targetCtx.restore();

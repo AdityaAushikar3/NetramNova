@@ -52,10 +52,10 @@ export const TechExplanationModal: React.FC<TechExplanationModalProps> = ({ isOp
           <div className="p-3 bg-slate-950 rounded border border-slate-800">
             <h4 className="text-xs font-bold text-emerald-400 mb-1 flex items-center gap-1.5 font-mono">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              2. Ben Graham Local Frequency Subtraction (I_std = 4·I - 4·GaussianBlur(σ=10) + 128)
+              2. Ben Graham Local Frequency Subtraction (I_std = 4·I - 4·GaussianBlur(σ≈17) + 128)
             </h4>
             <p className="text-xs text-slate-300 mb-2">
-              NetramNova employs <strong>Ben Graham Color Standardization</strong> (Gold-Standard Retinal Illumination Normalization). By subtracting a wide Gaussian blur ($\sigma=10$), low-frequency camera vignetting and flash gradients are completely wiped out. High-frequency lesion boundaries are amplified $4\times$, and normal retinal tissue is re-centered to a uniform median gray ($128$) across all camera brands.
+              NetramNova employs <strong>Ben Graham Color Standardization</strong> (Gold-Standard Retinal Illumination Normalization). By subtracting a wide Gaussian blur ($\sigma\approx17$), low-frequency camera vignetting and flash gradients are completely wiped out. High-frequency lesion boundaries are amplified $4\times$, and normal retinal tissue is re-centered to a uniform median gray ($128$) across all camera brands.
             </p>
             <div className="flex items-center gap-2 p-2 bg-slate-900 rounded font-mono text-xs text-slate-400 border border-slate-800">
               <FileText className="w-3.5 h-3.5 text-blue-400 shrink-0" />

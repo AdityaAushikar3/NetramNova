@@ -9,7 +9,7 @@ Training deep convolutional segmentation networks (e.g., U-Net) on small pixel-a
 
 ## Decision
 1. **Ben Graham Local Color Standardization Engine:**
-   Rather than relying on uncalibrated segmentation masks that overfit to camera sensor color distributions, NetramNova implements Ben Graham local color subtraction ( \cdot I - 4 \cdot \text{GaussianBlur}(I, \sigma=10) + 128$) natively in MATLAB Image Processing Toolbox and OpenCV.
+   Rather than relying on uncalibrated segmentation masks that overfit to camera sensor color distributions, NetramNova implements Ben Graham local color subtraction ( $\cdot I - 4 \cdot \text{GaussianBlur}(I, \sigma\approx17) + 128$) natively in MATLAB Image Processing Toolbox and OpenCV.
 2. **Gold-Standard Clinical Rule Consensus (ETDRS 4-2-1):**
    Lesion pathology is verified using international ETDRS 4-2-1 rules and high-resolution sub-pixel green channel filtering (-570$ nm) rather than fragile narrow U-Nets.
 

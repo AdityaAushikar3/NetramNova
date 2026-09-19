@@ -121,8 +121,19 @@ def apply_clahe(image_bgr: np.ndarray,
 def full_pipeline(image_bgr: np.ndarray,
                   sigma: float = 10.0) -> np.ndarray:
     """
-    Standardizes fundus illumination using Ben Graham local frequency subtraction:
-        I_std = 4*I - 4*GaussianBlur(I, sigma=10) + 128
-    CLAHE is omitted to preserve the neutral median gray baseline and prevent noise amplification.
+    WARNING: The original sigma=10 with masking pipeline has been deprecated
+    because it causes 'preprocessing drift' compared to the shipped inference checkpoint.
+    This function now delegates to prepare_model_input to guarantee parity.
+    
+    Returns
+    -------
+    uint8 BGR standardized image.
     """
-    return normalize_illumination(image_bgr, sigma=sigma)
+    import warnings
+    warnings.warn("full_pipeline with sigma=10 is deprecated due to preprocessing drift. Using shared prepare_model_input (sigma=17).", DeprecationWarning)
+    
+    from ml_pipeline.preprocessing.model_input import prepare_model_input
+    
+    # prepare_model_input returns RGB, so convert back to BGR to satisfy legacy dataset loaders
+    std_rgb, _, _, _ = prepare_model_input(image_bgr)
+    return cv2.cvtColor(std_rgb, cv2.COLOR_RGB2BGR)

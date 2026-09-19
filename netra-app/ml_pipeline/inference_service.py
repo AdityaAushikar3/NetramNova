@@ -46,7 +46,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from ml_pipeline.preprocessing.augmentation import get_val_transforms
 from ml_pipeline.preprocessing.quality_gate import check_quality
-from ml_pipeline.preprocessing.foracchia_normalization import normalize_illumination, full_pipeline
+from ml_pipeline.preprocessing.foracchia_normalization import normalize_illumination
+from ml_pipeline.preprocessing.model_input import prepare_model_input
 from ml_pipeline.evaluation.gradcam import GradCAM, visualize_gradcam
 from ml_pipeline.evaluation.etdrs_quadrant_engine import ETDRSQuadrantEngine, QuadrantCounts
 from ml_pipeline.evaluation.ma_patch_engine import MAPatchRescueEngine, MicroaneurysmAuditResult
@@ -105,27 +106,7 @@ def init_model(ckpt_path: str = "ml_pipeline/outputs/checkpoints/best_classifier
         print("[NetramNova Service] Model and Grad-CAM successfully initialized!", file=sys.stderr)
 
 
-def crop_fundus_circle(img: np.ndarray, tol: int = 7) -> tuple[np.ndarray, int, int]:
-    """Crops empty black background around circular retinal boundary. Returns (cropped_img, x_offset, y_offset)"""
-    if img.ndim == 2:
-        mask = img > tol
-        rows = np.any(mask, axis=1)
-        cols = np.any(mask, axis=0)
-        if not np.any(rows) or not np.any(cols): return img, 0, 0
-        ymin, ymax = np.where(rows)[0][[0, -1]]
-        xmin, xmax = np.where(cols)[0][[0, -1]]
-        return img[ymin:ymax+1, xmin:xmax+1], xmin, ymin
-        
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    mask = gray > tol
-    if not mask.any():
-        return img, 0, 0
-    
-    rows = np.any(mask, axis=1)
-    cols = np.any(mask, axis=0)
-    ymin, ymax = np.where(rows)[0][[0, -1]]
-    xmin, xmax = np.where(cols)[0][[0, -1]]
-    return img[ymin:ymax+1, xmin:xmax+1], xmin, ymin
+
 
 
 def extract_real_lesions_and_quadrants(img_bgr: np.ndarray, cam_map: np.ndarray | None = None) -> tuple[QuadrantCounts, list[tuple[int, int, int]]]:
@@ -201,14 +182,11 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
     glare_ratio = quality_eval["glare_pct"]
     fov_ratio = quality_eval["fov_pct"]
 
-    # 3. Ben Graham Illumination Normalization (Matching Training Pipeline Domain)
-    # Circle crop to isolate fundus circle and eliminate outer black borders
-    cropped_bgr, x_offset, y_offset = crop_fundus_circle(img_bgr)
-    img_512 = cv2.resize(cropped_bgr, (512, 512), interpolation=cv2.INTER_AREA)
-
-    # Ben Graham local frequency subtraction: 4*I - 4*GaussianBlur(I, sigma=512/30) + 128
-    standardized_bgr = cv2.addWeighted(img_512, 4, cv2.GaussianBlur(img_512, (0, 0), 512 / 30), -4, 128)
-    standardized_rgb = cv2.cvtColor(standardized_bgr, cv2.COLOR_BGR2RGB)
+    # 3. Standardized Preprocessing Pipeline (Resolving Preprocessing Drift)
+    # Extracts the exact pipeline the best_classifier.pt was evaluated on:
+    # Crop -> 512x512 INTER_AREA -> GaussianBlur(sigma=512/30, no mask) -> RGB
+    standardized_rgb, cropped_bgr, x_offset, y_offset = prepare_model_input(img_bgr)
+    standardized_bgr = cv2.cvtColor(standardized_rgb, cv2.COLOR_RGB2BGR)
 
     # 4. Neural Network Input (Standardized 512x512 tensor with ImageNet normalization)
     augmented = TRANSFORM(image=standardized_rgb)

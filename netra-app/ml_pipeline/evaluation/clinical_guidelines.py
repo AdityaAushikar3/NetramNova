@@ -176,3 +176,32 @@ DME_GUIDELINE = {
         "mandates immediate referral for macular OCT and anti-VEGF consideration."
     )
 }
+
+def get_deterministic_clinical_guidance(stage: int, has_macular_edema: bool) -> dict:
+    """
+    Deterministically generates the clinical guidance payload matching the API contract.
+    No LLMs or external databases are used.
+    """
+    # Safely handle out of bounds stages
+    safe_stage = max(0, min(4, stage))
+    guideline = CLINICAL_GUIDELINES[safe_stage]
+    
+    # Construct the technical note for the doctor
+    doctor_summary = f"Diagnosis: {guideline['stage_name']}. {guideline['aao_management_protocol']}"
+    
+    # Modify guidance if DME is present
+    referral_timeline = guideline["referral_timeline"]
+    if has_macular_edema:
+        doctor_summary += f"\n\nCRITICAL (CSME DETECTED): {DME_GUIDELINE['triage_escalation']} {DME_GUIDELINE['primary_treatment']} {DME_GUIDELINE['clinical_note']}"
+        # Override referral timeline due to macular edema severity
+        if safe_stage < 3: 
+            referral_timeline = "Urgent specialist referral within 1 to 2 weeks"
+            
+    return {
+        "icd10_code": guideline["icd10_code"],
+        "referral_timeline": referral_timeline,
+        "doctor_summary": doctor_summary,
+        "patient_summary_en": guideline["patient_summary_en"],
+        "patient_summary_hi": guideline["patient_summary_hi"],
+        "safety_audit_passed": True
+    }

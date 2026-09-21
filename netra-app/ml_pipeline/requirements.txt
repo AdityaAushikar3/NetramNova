@@ -18,5 +18,3 @@ tqdm>=4.65.0
 PyYAML>=6.0
 scipy>=1.11.0
 flask>=2.3.0
-langgraph>=0.0.15
-langchain-core>=0.1.0

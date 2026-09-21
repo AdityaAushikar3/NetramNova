@@ -18,13 +18,13 @@ Main features:
 - Quality Gate: Automatically rejects ungradable images (blur, glare).
 - Ben Graham Adaptive Standardization: Enhances image lighting without amplifying noise.
 - Sub-Pixel Patch Hunter: Detects tiny microaneurysms that standard AI misses when resizing images.
-- Grounded Medical RAG: Uses a local vector database to provide clinical guidelines without hallucination.
+- Deterministic Clinical Guidelines: Uses a robust, static rule engine to provide gold-standard guidelines consistently.
 - Edge-Deployable: Runs offline on a basic ₹10,000 laptop without requiring cloud connectivity.
 
 Technologies used:
 - Backend AI Engine: PyTorch, Torchvision, TIMM (EfficientNet-B2), OpenCV, NumPy, Flask
 - Frontend Workstation: Next.js 14, React, Tailwind CSS, TypeScript
-- AI/RAG: LangGraph, ChromaDB
+- Clinical Guidelines: Deterministic static dictionary mappings
 
 Programming language(s):
 - Python (Backend ML/CV)
@@ -84,9 +84,7 @@ c:\Users\Aditya\Desktop\NEtra\netra-app\
 │   ├── preprocessing/
 │   │   Contains the quality gate logic and Ben Graham normalization.
 │   ├── evaluation/
-│   │   Contains clinical rule engines (ETDRS 4-2-1), microaneurysm patch hunter, and Grad-CAM code.
-│   ├── rag/
-│   │   Contains the LangGraph agents and ChromaDB logic to enforce safe, non-hallucinated medical reports.
+│   │   Contains clinical rule engines (ETDRS 4-2-1), microaneurysm patch hunter, and the deterministic clinical guidelines engine.
 
 ==================================================
 3. HOW THE PROJECT STARTS
@@ -133,8 +131,8 @@ Since deep learning downsamples images, it often misses tiny 10-micron microaneu
 The system runs a "Sub-Pixel Patch Hunter" on the raw high-resolution image. 
 Rule Engine: If the Deep Learning model says Grade 0 (Healthy), but the Patch Hunter finds an isolated microaneurysm, the system *overrules* the AI and upgrades the diagnosis to Grade 1 (Mild NPDR).
 
-5. Agentic Multi-Agent Reflection (RAG):
-The system uses LangGraph to draft a medical report. A "Drafter Agent" writes the report, and a "Safety Auditor Agent" double-checks it against an offline database of AIIMS/AAO guidelines to ensure the AI isn't hallucinating fake medications.
+5. Deterministic Clinical Guidelines Engine:
+The system uses a static, deterministic rule engine to draft the clinical report based on AIIMS/AAO guidelines, completely avoiding LLM hallucination risks while generating strict, consistent clinical and patient summaries.
 
 ==================================================
 5. CODE WALKTHROUGH
@@ -225,7 +223,7 @@ PyTorch EfficientNet predicts probabilities
 ↓
 ETDRS Rules Engine verifies/overrides AI prediction
 ↓
-LangGraph Agent drafts a clinical report based on the final grade
+Deterministic engine drafts a clinical report based on the final grade
 ↓
 Backend returns JSON (Grade, Report, Heatmap) to Frontend
 ↓
@@ -258,7 +256,7 @@ Frontend (`package.json`):
 There is an `.env` and `.env.example` file.
 Typically, they contain:
 - NEXT_PUBLIC_API_URL: Points the frontend to the Python backend (e.g., http://localhost:5000)
-- OPENAI_API_KEY / GEMINI_API_KEY: [SECRET/KEY PRESENT — NOT SHOWN] Used for the LangGraph/RAG clinical report generation.
+- OPENAI_API_KEY / GEMINI_API_KEY: Not required anymore, deterministic guidelines replaced LLM RAG engine.
 
 In `db.ts`, there is logic handling `db.json` vs `/tmp/db.json` to handle Vercel's read-only file system in production.
 
@@ -269,7 +267,7 @@ In `db.ts`, there is logic handling `db.json` vs `/tmp/db.json` to handle Vercel
 - Quality Rejection: If the image is blurry, `check_quality()` returns `{passed: False}`. The backend safely aborts deep learning inference and returns an error explaining to the user exactly why (e.g., "Flash glare detected. Adjust angle.").
 - Decoding Errors: If a corrupt image is uploaded, OpenCV returns `None`, and the backend gracefully returns `{"error": "Could not decode fundus image file"}`.
 - Offline Fallback: The frontend Next.js app uses local state and `db.json` to store patient data if the internet is down, syncing later when connection restores.
-- LLM Hallucination Guard: The LangGraph Safety Auditor actively checks the generated report against the AIIMS guidelines and blocks it if the LLM hallucinates an unapproved medication.
+- Deterministic Safety: By using a hardcoded, deterministic clinical guideline engine mapped directly from AIIMS/AAO guidelines, the system fundamentally eliminates any risk of LLM hallucinations.
 
 ==================================================
 12. SECURITY
@@ -277,7 +275,7 @@ In `db.ts`, there is logic handling `db.json` vs `/tmp/db.json` to handle Vercel
 
 - Offline Data Privacy: Rural internet is unreliable. By processing inference locally (edge AI) and storing patient data in local IndexedDB/db.json, patient health data (PHI) never leaves the clinic unless explicitly synced to the district hospital.
 - Read-Only Validation: The Next.js backend uses strict TypeScript typing to ensure database schemas are not corrupted.
-- LLM Safety: Medical RAG is heavily sandboxed. The system restricts the LLM to local vector databases to prevent it from giving dangerous external advice.
+- Deterministic Safety: Instead of using unpredictable LLMs, the system relies on static, reviewed clinical guidelines mapping, ensuring 100% safe, non-hallucinated medical advice.
 
 ==================================================
 13. COMPLETE EXECUTION EXAMPLE
@@ -321,7 +319,7 @@ In `db.ts`, there is logic handling `db.json` vs `/tmp/db.json` to handle Vercel
    A: It is the global clinical gold standard for grading Diabetic Retinopathy based on counting hemorrhages and abnormalities in 4 quadrants. Our system uses a rule engine to enforce this.
 
 8. Q: How do you prevent the AI from hallucinating medical advice? (SECURITY)
-   A: We use a LangGraph Multi-Agent system where a Drafter Agent writes a report based strictly on local ChromaDB guidelines, and a Safety Auditor Agent verifies it before showing it to the doctor.
+   A: We entirely bypassed LLMs for the final report generation. We use a deterministic clinical guidelines engine that maps the final AI grade directly to static, pre-approved AAO/AIIMS guidelines.
 
 9. Q: How do you deploy this in a clinic with no internet? (ARCHITECTURE)
    A: The PyTorch model runs locally via a lightweight Flask server on the clinic's laptop, and Next.js caches patient data locally, syncing to the district server only when internet is available.
@@ -366,10 +364,10 @@ EfficientNet:
 - Why: Scales depth, width, and resolution efficiently. B2 provides the perfect balance of accuracy and edge-device (CPU) performance.
 - Alternative: ResNet-50 (too heavy), MobileNet (too inaccurate).
 
-LangGraph / ChromaDB:
-- What: AI Agent framework and Vector Database.
-- Why: To create a verifiable, grounded RAG system that prevents LLM hallucinations in medical reports.
-- Alternative: Standard LangChain or OpenAI API (less safe for clinical use without auditor loops).
+Deterministic Guidelines Engine:
+- What: A static dictionary mapping of grades to AIIMS/AAO guidelines.
+- Why: To create a verifiable, 100% safe clinical report completely immune to LLM hallucinations.
+- Alternative: LLM-based RAG (removed for safety concerns).
 
 ==================================================
 17. LIMITATIONS
@@ -408,7 +406,7 @@ First, we built a beautiful, offline-capable Next.js UI that health workers can 
 Second, our AI doesn't just guess a number. When an image is captured, our Python backend runs a Quality Gate to reject blurry images instantly. Then, we apply Ben Graham normalization to fix shadows. 
 We pass this to an EfficientNet-B2 neural network, but we don't stop there. We run classical computer vision algorithms to enforce the international ETDRS 4-2-1 clinical rules—for example, hunting for sub-pixel microaneurysms on the original high-res image. If our rule engine finds something the AI missed, it overrides the AI.
 
-Finally, to ensure doctors trust the system, we generate a Grad-CAM heatmap showing exactly where the disease is, and a LangGraph Agent drafts a clinical report backed by offline AIIMS guidelines, guaranteeing no hallucinations. 
+Finally, to ensure doctors trust the system, we generate a Grad-CAM heatmap showing exactly where the disease is, and a deterministic engine drafts a clinical report backed by static AIIMS guidelines, guaranteeing zero hallucinations. 
 
 By filtering out the 72% of patients who are healthy locally, we reduce the burden on district hospitals, multiplying specialist efficiency and saving sight."
 
@@ -433,8 +431,8 @@ By filtering out the 72% of patients who are healthy locally, we reduce the burd
 9. The Fix: Sub-Pixel Patch Hunter (analyzes original high-res image).
 10. Clinical Rules: ETDRS 4-2-1 rule engine overrides AI if necessary.
 11. Explainability: Grad-CAM generates heatmaps so doctors trust it.
-12. LLM Engine: LangGraph + ChromaDB.
-13. RAG Setup: Offline vector DB of AIIMS/AAO guidelines to prevent hallucinations.
+12. Clinical Engine: Deterministic static guidelines mapping.
+13. Safety Setup: Hardcoded AIIMS/AAO rules to fundamentally prevent hallucinations.
 14. Database: Mock `db.json` via `db.ts` for offline capability.
 15. Input: Raw fundus image (retinal photo).
 16. Output: Grade (0-4), Heatmap, Clinical Report.

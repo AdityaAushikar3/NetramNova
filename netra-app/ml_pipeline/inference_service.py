@@ -32,11 +32,11 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from flask import Flask
 
-# NetramNova RAG & LangGraph Clinical Co-Pilot Engine
+# Deterministic Clinical Guidelines Engine
 try:
-    from rag.langgraph_clinical_agent import generate_grounded_clinical_report
+    from evaluation.clinical_guidelines import get_deterministic_clinical_guidance
 except ImportError:
-    from ml_pipeline.rag.langgraph_clinical_agent import generate_grounded_clinical_report
+    from ml_pipeline.evaluation.clinical_guidelines import get_deterministic_clinical_guidance
 
 # ML-2 FIX: Removed dead module-level app = Flask(__name__) here.
 # The real Flask app with all routes is created inside start_server().
@@ -353,19 +353,8 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
     confidence_label = "High" if conf_score >= 80.0 else ("Medium" if conf_score >= 60.0 else "Low")
     csme_detected = bool(final_grade >= 2 and probs[2] > 0.25)
 
-    # Execute Grounded RAG & LangGraph Clinical Reflection Engine
-    try:
-        rag_report = generate_grounded_clinical_report(stage=final_grade, has_macular_edema=csme_detected)
-    except Exception as e:
-        print(f"[InferenceService WARNING] RAG report generation failed: {e}")
-        rag_report = {
-            "icd10_code": "E11.3" + str(final_grade) + "9",
-            "referral_timeline": recall_advice,
-            "doctor_summary": f"Diagnosis: {ICDR_NAMES[final_grade]}. Routine clinical review indicated.",
-            "patient_summary_en": "Your eye scan has been processed. Follow up with your doctor as advised.",
-            "patient_summary_hi": "आपकी आँख की जांच पूरी हो गई है। डॉक्टर की सलाह के अनुसार अपनी अगली जांच करवाएं।",
-            "safety_audit_passed": True
-        }
+    # Execute Deterministic Clinical Reflection Engine
+    rag_report = get_deterministic_clinical_guidance(stage=final_grade, has_macular_edema=csme_detected)
 
     return {
         "diagnosis": ICDR_NAMES[final_grade],

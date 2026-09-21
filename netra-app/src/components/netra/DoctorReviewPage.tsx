@@ -186,7 +186,7 @@ export const DoctorReviewPage: React.FC<DoctorReviewPageProps> = ({
                     <span>Clinical Acquisition</span>
                     <span className="text-sky-400 font-semibold">Before: Raw Fundus Photo</span>
                   </div>
-                  <FundusCanvas mode="colour" findings={selectedCase.result.findings} imageUrl={selectedCase.imageUrl} />
+                  <FundusCanvas findings={selectedCase.result.findings} imageUrl={selectedCase.imageUrl || ''} />
                 </div>
                 <div>
                   <div className="text-xs font-mono text-slate-400 mb-1 flex items-center justify-between">
@@ -205,7 +205,7 @@ export const DoctorReviewPage: React.FC<DoctorReviewPageProps> = ({
                       </div>
                     </div>
                   ) : (
-                    <FundusCanvas mode="colour" findings={selectedCase.result.findings} imageUrl={selectedCase.imageUrl} />
+                    <FundusCanvas findings={selectedCase.result.findings} imageUrl={selectedCase.imageUrl || ''} />
                   )}
                 </div>
               </div>

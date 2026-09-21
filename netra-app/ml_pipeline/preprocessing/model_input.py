@@ -41,16 +41,23 @@ def crop_fundus_circle(img: np.ndarray, tol: int = 7) -> tuple[np.ndarray, int, 
     return img[ymin:ymax+1, xmin:xmax+1], xmin, ymin
 
 
-def prepare_model_input(img_bgr: np.ndarray) -> tuple[np.ndarray, np.ndarray, int, int]:
+from dataclasses import dataclass
+
+@dataclass
+class PreparedImage:
+    cropped_bgr: np.ndarray
+    pre_ben_graham_512: np.ndarray
+    standardized_rgb: np.ndarray
+    x_offset: int
+    y_offset: int
+
+def prepare_model_input(img_bgr: np.ndarray) -> PreparedImage:
     """
     Standardizes a fundus image to match the precise domain the model expects.
     
     Returns
     -------
-    standardized_rgb : 512x512 RGB np.ndarray (for Albumentations and PyTorch)
-    cropped_bgr      : Cropped (unresized) BGR np.ndarray (for Grad-CAM overlay & Lesion Extraction)
-    x_offset         : int, horizontal crop offset
-    y_offset         : int, vertical crop offset
+    PreparedImage dataclass containing all necessary image states.
     """
     # 1. Circular Crop
     cropped_bgr, x_offset, y_offset = crop_fundus_circle(img_bgr)
@@ -65,4 +72,10 @@ def prepare_model_input(img_bgr: np.ndarray) -> tuple[np.ndarray, np.ndarray, in
     # 4. Convert to RGB for model input
     standardized_rgb = cv2.cvtColor(standardized_bgr, cv2.COLOR_BGR2RGB)
     
-    return standardized_rgb, cropped_bgr, x_offset, y_offset
+    return PreparedImage(
+        cropped_bgr=cropped_bgr,
+        pre_ben_graham_512=img_512,
+        standardized_rgb=standardized_rgb,
+        x_offset=x_offset,
+        y_offset=y_offset
+    )

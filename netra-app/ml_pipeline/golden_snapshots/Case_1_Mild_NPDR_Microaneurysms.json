@@ -1,0 +1,91 @@
+{
+  "diagnosis": "Mild Non-Proliferative Diabetic Retinopathy",
+  "icdrLevel": 1,
+  "severity": "mild",
+  "confidence": "Medium",
+  "confidenceScore": 78.4,
+  "triageTier": "Tier 1 (Auto-Cleared)",
+  "recallAdvice": "12 Months",
+  "progressionRisk": 22,
+  "csmeThreatDetected": false,
+  "csmeFoveaDistanceDiscDiameters": 1.8,
+  "findings": [
+    {
+      "id": "f-ma-1",
+      "name": "Microaneurysms",
+      "count": 39,
+      "severity": "mild",
+      "category": "structural",
+      "locationDescription": "Detected 39 microaneurysms: Sup=26, Inf=8, Nas=1, Temp=4",
+      "coords": [
+        {
+          "x": 48.29,
+          "y": 6.45,
+          "radius": 0.7,
+          "cropX": 46.48,
+          "cropY": 6.45,
+          "cropRadius": 0.78
+        },
+        {
+          "x": 41.69,
+          "y": 6.25,
+          "radius": 0.54,
+          "cropX": 39.45,
+          "cropY": 6.25,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 49.76,
+          "y": 6.45,
+          "radius": 0.54,
+          "cropX": 48.05,
+          "cropY": 6.45,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 50.49,
+          "y": 6.45,
+          "radius": 0.54,
+          "cropX": 48.83,
+          "cropY": 6.45,
+          "cropRadius": 0.59
+        }
+      ]
+    }
+  ],
+  "clinicalGuidance": {
+    "icd10Code": "E11.319",
+    "referralTimeline": "Follow-up in 6 to 12 months at PHC or Community Health Centre",
+    "guidelineSource": "AAO Preferred Practice Pattern (PPP 2023) & AIIMS Guidelines",
+    "doctorTechnicalNote": "Diagnosis: Mild Non-Proliferative Diabetic Retinopathy (Mild NPDR). AAO PPP Guideline Table 4.2: Mild NPDR is characterized by microaneurysms only. The 1-year progression risk to proliferative disease is low (~5%). Management focuses on systemic medical optimization: rigorous glycemic control (HbA1c < 7.0%), arterial hypertension management, and lipid panel optimization. Routine retinal review in 6–12 months is standard.",
+    "patientSummaryEn": "Mild changes detected: You have early, tiny pinpoint swelling in the small blood vessels of your eye. Your sight is not currently at risk, but this is an early warning signal. With strict sugar and diet control, progression can be stopped. Schedule a follow-up eye scan in 6 to 12 months.",
+    "patientSummaryHi": "शुरुआती बदलाव: आपकी आँख की बारीक नसों में बहुत छोटे उभार (माइक्रोएन्यूरिज्म) देखे गए हैं। अभी आपकी दृष्टि को कोई खतरा नहीं है, लेकिन यह एक चेतावनी संकेत है। सख्त शुगर नियंत्रण और स्वस्थ आहार से इसे रोका जा सकता है। 6 से 12 महीने बाद दोबारा अपनी आँख की जांच करवाएं।",
+    "safetyAuditPassed": true
+  },
+  "qualityStatus": "passed",
+  "qualityTier": "AMBER",
+  "quality": {
+    "fovDetected": true,
+    "focusAcceptable": false,
+    "exposureAcceptable": true,
+    "retinaVisible": true,
+    "blurScore": 0.05,
+    "illuminationUniformity": 1.0,
+    "qualityTier": "AMBER",
+    "route": "adaptive_enhancement",
+    "technicianFeedback": "BORDERLINE: Mild underexposure or peripheral shadow. Routing to Adaptive Ben Graham Illumination Standardization."
+  },
+  "rawModelPrediction": 1,
+  "calibratedReferable": false,
+  "referableProbability": 3.6,
+  "probabilities": {
+    "No Apparent Diabetic Retinopathy": 18.0,
+    "Mild Non-Proliferative Diabetic Retinopathy": 78.4,
+    "Moderate Non-Proliferative Diabetic Retinopathy": 3.3,
+    "Severe Non-Proliferative Diabetic Retinopathy": 0.0,
+    "Proliferative Diabetic Retinopathy": 0.3
+  },
+  "rescuedBy": null,
+  "preprocessedImage": "HASH:f303fc69664af7789b5f95495b1d99e2",
+  "gradcamOverlay": "HASH:cd97d4e79e5b11e8d4693292fc67bb60"
+}

@@ -1,0 +1,197 @@
+{
+  "diagnosis": "Severe Non-Proliferative Diabetic Retinopathy",
+  "icdrLevel": 3,
+  "severity": "severe",
+  "confidence": "Medium",
+  "confidenceScore": 75.6,
+  "triageTier": "Tier 3 (Specialist Escalation)",
+  "recallAdvice": "3 Months (Urgent)",
+  "progressionRisk": 82,
+  "csmeThreatDetected": false,
+  "csmeFoveaDistanceDiscDiameters": 0.45,
+  "findings": [
+    {
+      "id": "f-hem-1",
+      "name": "Hemorrhages",
+      "count": 311,
+      "severity": "severe",
+      "category": "structural",
+      "locationDescription": "ETDRS Rule 4 Verified (>=20 in all quadrants): Sup=53, Inf=54, Nas=78, Temp=126",
+      "coords": [
+        {
+          "x": 41.23,
+          "y": 21.44,
+          "radius": 0.49,
+          "cropX": 41.21,
+          "cropY": 21.48,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 40.84,
+          "y": 27.49,
+          "radius": 2.05,
+          "cropX": 40.82,
+          "cropY": 27.54,
+          "cropRadius": 2.15
+        },
+        {
+          "x": 38.69,
+          "y": 23.39,
+          "radius": 1.46,
+          "cropX": 38.67,
+          "cropY": 23.44,
+          "cropRadius": 1.56
+        },
+        {
+          "x": 41.42,
+          "y": 23.78,
+          "radius": 0.49,
+          "cropX": 41.41,
+          "cropY": 23.83,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 17.25,
+          "y": 24.76,
+          "radius": 0.68,
+          "cropX": 17.19,
+          "cropY": 24.8,
+          "cropRadius": 0.78
+        },
+        {
+          "x": 38.89,
+          "y": 24.76,
+          "radius": 0.49,
+          "cropX": 38.87,
+          "cropY": 24.8,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 39.86,
+          "y": 24.95,
+          "radius": 0.49,
+          "cropX": 39.84,
+          "cropY": 25.0,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 54.29,
+          "y": 25.93,
+          "radius": 0.88,
+          "cropX": 54.3,
+          "cropY": 25.98,
+          "cropRadius": 0.98
+        },
+        {
+          "x": 46.88,
+          "y": 26.32,
+          "radius": 0.88,
+          "cropX": 46.88,
+          "cropY": 26.37,
+          "cropRadius": 0.98
+        },
+        {
+          "x": 56.43,
+          "y": 27.1,
+          "radius": 0.68,
+          "cropX": 56.45,
+          "cropY": 27.15,
+          "cropRadius": 0.78
+        },
+        {
+          "x": 57.41,
+          "y": 26.71,
+          "radius": 0.49,
+          "cropX": 57.42,
+          "cropY": 26.76,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 18.23,
+          "y": 29.24,
+          "radius": 2.05,
+          "cropX": 18.16,
+          "cropY": 29.3,
+          "cropRadius": 2.15
+        }
+      ]
+    },
+    {
+      "id": "f-vasc-1",
+      "name": "Vascular Abnormalities",
+      "count": 4,
+      "severity": "severe",
+      "category": "structural",
+      "locationDescription": "Venous beading and prominent IRMA loops",
+      "coords": [
+        {
+          "x": 36.16,
+          "y": 27.68,
+          "radius": 0.49,
+          "cropX": 36.13,
+          "cropY": 27.73,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 55.46,
+          "y": 27.68,
+          "radius": 0.68,
+          "cropX": 55.47,
+          "cropY": 27.73,
+          "cropRadius": 0.78
+        },
+        {
+          "x": 41.42,
+          "y": 28.07,
+          "radius": 0.88,
+          "cropX": 41.41,
+          "cropY": 28.12,
+          "cropRadius": 0.98
+        },
+        {
+          "x": 46.3,
+          "y": 30.02,
+          "radius": 2.25,
+          "cropX": 46.29,
+          "cropY": 30.08,
+          "cropRadius": 2.34
+        }
+      ]
+    }
+  ],
+  "clinicalGuidance": {
+    "icd10Code": "E11.349",
+    "referralTimeline": "Urgent specialist referral within 2 to 4 weeks",
+    "guidelineSource": "AAO Preferred Practice Pattern (PPP 2023) & AIIMS Guidelines",
+    "doctorTechnicalNote": "Diagnosis: Severe Non-Proliferative Diabetic Retinopathy (Severe NPDR). AAO PPP Guideline Section 4.4: Severe NPDR confers a 50% risk of progressing to high-risk proliferative retinopathy within 12 months. Mandatory urgent referral to a vitreoretinal specialist within 2 to 4 weeks. Perform baseline Macular OCT and Widefield Fluorescein Angiography (FFA). Prophylactic panretinal photocoagulation (PRP) or anti-VEGF intravitreal therapy may be considered if patient compliance is uncertain.",
+    "patientSummaryEn": "Urgent medical attention needed: Serious diabetic damage and poor blood circulation are present across your retina. You are at high risk of rapid vision loss without treatment. Visit an eye specialist or district hospital within 2 to 4 weeks for specialized retinal scans and possible laser/injection therapy.",
+    "patientSummaryHi": "तत्काल ध्यान देने की आवश्यकता: आपकी आँख के पर्दे में गंभीर खराबी और खून के बहाव में रुकावट देखी गई है। बिना इलाज के नजर तेजी से कमजोर होने का बड़ा खतरा है। अगले 2 से 4 सप्ताह के भीतर किसी बड़े अस्पताल में रेटिना विशेषज्ञ को दिखाएं ताकि समय रहते लेजर या इंजेक्शन से रोशनी बचाई जा सके।",
+    "safetyAuditPassed": true
+  },
+  "qualityStatus": "passed",
+  "qualityTier": "GREEN",
+  "quality": {
+    "fovDetected": true,
+    "focusAcceptable": true,
+    "exposureAcceptable": true,
+    "retinaVisible": true,
+    "blurScore": 0.2,
+    "illuminationUniformity": 1.0,
+    "qualityTier": "GREEN",
+    "route": "direct_pass",
+    "technicianFeedback": "OPTIMAL: Sharp focus, uniform illumination, and centered retinal field. Direct pass to classifier."
+  },
+  "rawModelPrediction": 3,
+  "calibratedReferable": true,
+  "referableProbability": 99.6,
+  "probabilities": {
+    "No Apparent Diabetic Retinopathy": 0.4,
+    "Mild Non-Proliferative Diabetic Retinopathy": 0.0,
+    "Moderate Non-Proliferative Diabetic Retinopathy": 0.8,
+    "Severe Non-Proliferative Diabetic Retinopathy": 75.6,
+    "Proliferative Diabetic Retinopathy": 23.2
+  },
+  "rescuedBy": null,
+  "preprocessedImage": "HASH:9c82a0dd3a9eaabe1e2bc4c13bb41eec",
+  "gradcamOverlay": "HASH:bbe845f5d71daf27b29e6142f7fa0d8f"
+}

@@ -1,0 +1,48 @@
+{
+  "diagnosis": "No Apparent Diabetic Retinopathy",
+  "icdrLevel": 0,
+  "severity": "normal",
+  "confidence": "High",
+  "confidenceScore": 99.5,
+  "triageTier": "Tier 1 (Auto-Cleared)",
+  "recallAdvice": "12 Months",
+  "progressionRisk": 5,
+  "csmeThreatDetected": false,
+  "csmeFoveaDistanceDiscDiameters": 1.8,
+  "findings": [],
+  "clinicalGuidance": {
+    "icd10Code": "E11.9 / Z13.5",
+    "referralTimeline": "Annual follow-up in 12 months at Primary Health Centre (PHC)",
+    "guidelineSource": "AAO Preferred Practice Pattern (PPP 2023) & AIIMS Guidelines",
+    "doctorTechnicalNote": "Diagnosis: No Apparent Diabetic Retinopathy. AAO PPP Guideline Table 4.1: Patients with diabetes but no visible retinopathy require annual dilated fundus examinations. Emphasize strict glycemic target (HbA1c < 7.0%), blood pressure control (< 130/80 mmHg), and lipid management. No immediate ophthalmic intervention or tertiary hospital referral is required.",
+    "patientSummaryEn": "Good news: Your retina examination shows no signs of diabetic damage at this time. Your blood vessels appear clear and healthy. To protect your vision, keep your blood sugar and blood pressure under control, and return for your next routine eye check in 12 months.",
+    "patientSummaryHi": "अच्छी खबर: आपकी आँख के पर्दे (रेटिना) में मधुमेह का कोई नुकसान नहीं पाया गया है। खून की नसें स्वस्थ हैं। अपनी दृष्टि को सुरक्षित रखने के लिए शुगर और ब्लड प्रेशर को नियंत्रित रखें, और 12 महीने बाद अपनी अगली नियमित आँख की जांच करवाएं।",
+    "safetyAuditPassed": true
+  },
+  "qualityStatus": "passed",
+  "qualityTier": "GREEN",
+  "quality": {
+    "fovDetected": true,
+    "focusAcceptable": true,
+    "exposureAcceptable": true,
+    "retinaVisible": true,
+    "blurScore": 0.13,
+    "illuminationUniformity": 1.0,
+    "qualityTier": "GREEN",
+    "route": "direct_pass",
+    "technicianFeedback": "OPTIMAL: Sharp focus, uniform illumination, and centered retinal field. Direct pass to classifier."
+  },
+  "rawModelPrediction": 0,
+  "calibratedReferable": false,
+  "referableProbability": 0.3,
+  "probabilities": {
+    "No Apparent Diabetic Retinopathy": 99.5,
+    "Mild Non-Proliferative Diabetic Retinopathy": 0.2,
+    "Moderate Non-Proliferative Diabetic Retinopathy": 0.2,
+    "Severe Non-Proliferative Diabetic Retinopathy": 0.1,
+    "Proliferative Diabetic Retinopathy": 0.0
+  },
+  "rescuedBy": null,
+  "preprocessedImage": "HASH:96d6b71228010d2c921d21981b2a1659",
+  "gradcamOverlay": "HASH:85f662f2d1c8753dd23c0ee03faaf13b"
+}

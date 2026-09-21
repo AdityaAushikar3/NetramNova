@@ -125,12 +125,19 @@ class GradCAM:
         score.backward()
 
         # Grad-CAM computation
+        return self.compute_map_from_hooks()
+
+    def compute_map_from_hooks(self) -> np.ndarray:
+        """
+        Computes the Grad-CAM heatmap using the gradients and activations 
+        already captured by the hooks from a recent backward pass.
+        """
         grads   = self._gradients       # (1, C, H, W)
         acts    = self._activations     # (1, C, H, W)
 
         if grads is None or acts is None:
             raise RuntimeError("Grad-CAM hooks did not capture data. "
-                               "Check target_layer.")
+                               "Ensure forward and backward passes occurred.")
 
         # Global average pool of gradients → importance weights
         weights = grads.mean(dim=(2, 3), keepdim=True)   # (1, C, 1, 1)

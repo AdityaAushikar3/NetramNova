@@ -1,0 +1,165 @@
+{
+  "diagnosis": "Moderate Non-Proliferative Diabetic Retinopathy",
+  "icdrLevel": 2,
+  "severity": "moderate",
+  "confidence": "Medium",
+  "confidenceScore": 77.9,
+  "triageTier": "Tier 2 (Priority Review)",
+  "recallAdvice": "6 Months",
+  "progressionRisk": 54,
+  "csmeThreatDetected": true,
+  "csmeFoveaDistanceDiscDiameters": 0.45,
+  "findings": [
+    {
+      "id": "f-hem-1",
+      "name": "Hemorrhages",
+      "count": 23,
+      "severity": "moderate",
+      "category": "structural",
+      "locationDescription": "Moderate multi-quadrant hemorrhages (23 detected): Sup=6, Inf=1, Nas=15, Temp=1",
+      "coords": [
+        {
+          "x": 32.57,
+          "y": 2.15,
+          "radius": 0.54,
+          "cropX": 29.69,
+          "cropY": 2.15,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 85.01,
+          "y": 8.98,
+          "radius": 0.54,
+          "cropX": 85.74,
+          "cropY": 8.98,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 85.37,
+          "y": 11.13,
+          "radius": 0.7,
+          "cropX": 86.13,
+          "cropY": 11.13,
+          "cropRadius": 0.78
+        },
+        {
+          "x": 78.8,
+          "y": 13.87,
+          "radius": 0.91,
+          "cropX": 79.1,
+          "cropY": 13.87,
+          "cropRadius": 0.98
+        },
+        {
+          "x": 85.56,
+          "y": 13.28,
+          "radius": 0.7,
+          "cropX": 86.33,
+          "cropY": 13.28,
+          "cropRadius": 0.78
+        },
+        {
+          "x": 85.74,
+          "y": 21.29,
+          "radius": 1.82,
+          "cropX": 86.52,
+          "cropY": 21.29,
+          "cropRadius": 1.95
+        },
+        {
+          "x": 79.34,
+          "y": 17.38,
+          "radius": 0.7,
+          "cropX": 79.69,
+          "cropY": 17.38,
+          "cropRadius": 0.78
+        },
+        {
+          "x": 78.98,
+          "y": 23.63,
+          "radius": 0.54,
+          "cropX": 79.3,
+          "cropY": 23.63,
+          "cropRadius": 0.59
+        }
+      ]
+    },
+    {
+      "id": "f-ex-1",
+      "name": "Hard Exudates",
+      "count": 4,
+      "severity": "moderate",
+      "category": "colour",
+      "locationDescription": "Lipid deposits in temporal arcade",
+      "coords": [
+        {
+          "x": 78.98,
+          "y": 25.0,
+          "radius": 0.54,
+          "cropX": 79.3,
+          "cropY": 25.0,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 88.11,
+          "y": 33.01,
+          "radius": 1.61,
+          "cropX": 89.06,
+          "cropY": 33.01,
+          "cropRadius": 1.76
+        },
+        {
+          "x": 79.16,
+          "y": 29.49,
+          "radius": 0.54,
+          "cropX": 79.49,
+          "cropY": 29.49,
+          "cropRadius": 0.59
+        },
+        {
+          "x": 77.52,
+          "y": 33.4,
+          "radius": 1.99,
+          "cropX": 77.73,
+          "cropY": 33.4,
+          "cropRadius": 2.15
+        }
+      ]
+    }
+  ],
+  "clinicalGuidance": {
+    "icd10Code": "E11.329",
+    "referralTimeline": "Urgent specialist referral within 1 to 2 weeks",
+    "guidelineSource": "AAO Preferred Practice Pattern (PPP 2023) & AIIMS Guidelines",
+    "doctorTechnicalNote": "Diagnosis: Moderate Non-Proliferative Diabetic Retinopathy (Moderate NPDR). AAO PPP Guideline Table 4.3: Moderate NPDR carries a 12-27% 1-year progression rate to severe disease. Referral to an ophthalmologist for comprehensive dilated biomicroscopy within 3 to 6 months is indicated. Evaluate for subclinical macular edema via Optical Coherence Tomography (OCT). Optimize cardiovascular and renal comorbidities; aggressive glycemic target (HbA1c < 7.0%) prevents vision deterioration.\n\nCRITICAL (CSME DETECTED): Escalate any DR stage to URGENT REFERRAL (within 1 to 2 weeks). Intravitreal Anti-VEGF pharmacotherapy (Aflibercept / Ranibizumab / Bevacizumab) as first-line therapy for center-involved DME, supplemented by targeted focal/grid laser photocoagulation for non-center DME. Macular edema is the primary cause of moderate vision loss in diabetic patients. Even if the peripheral retina exhibits only Mild (Stage 1) or Moderate (Stage 2) NPDR, the presence of macular involvement mandates immediate referral for macular OCT and anti-VEGF consideration.",
+    "patientSummaryEn": "Moderate diabetic eye changes: Small bleeding spots and protein deposits are present in your retina. You require a formal evaluation by an eye specialist within 3 to 6 months. Do not delay. Keep your blood sugar and blood pressure strictly controlled to protect your central vision.",
+    "patientSummaryHi": "मध्यम स्थिति: आँख के पर्दे में खून के छोटे धब्बे और रिसाव के निशान देखे गए हैं। अगले 3 से 6 महीने के भीतर किसी नेत्र विशेषज्ञ (आई डॉक्टर) से अपनी आँखों की पूरी जांच करवाएं। लापरवाही न बरतें। अपनी नजर को सुरक्षित रखने के लिए शुगर और बीपी को पूरी तरह नियंत्रित रखें।",
+    "safetyAuditPassed": true
+  },
+  "qualityStatus": "passed",
+  "qualityTier": "AMBER",
+  "quality": {
+    "fovDetected": true,
+    "focusAcceptable": false,
+    "exposureAcceptable": true,
+    "retinaVisible": true,
+    "blurScore": 0.04,
+    "illuminationUniformity": 1.0,
+    "qualityTier": "AMBER",
+    "route": "adaptive_enhancement",
+    "technicianFeedback": "BORDERLINE: Mild underexposure or peripheral shadow. Routing to Adaptive Ben Graham Illumination Standardization."
+  },
+  "rawModelPrediction": 2,
+  "calibratedReferable": true,
+  "referableProbability": 99.7,
+  "probabilities": {
+    "No Apparent Diabetic Retinopathy": 0.2,
+    "Mild Non-Proliferative Diabetic Retinopathy": 0.1,
+    "Moderate Non-Proliferative Diabetic Retinopathy": 77.9,
+    "Severe Non-Proliferative Diabetic Retinopathy": 5.1,
+    "Proliferative Diabetic Retinopathy": 16.7
+  },
+  "rescuedBy": null,
+  "preprocessedImage": "HASH:12ff6972351c4c0c20e7095dc3c000cf",
+  "gradcamOverlay": "HASH:fcf4c34aba2d7a47325db234b3e2a58a"
+}

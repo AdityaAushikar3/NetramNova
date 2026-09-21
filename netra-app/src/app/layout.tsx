@@ -26,14 +26,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${outfit.variable} h-full antialiased dark`}
+      className={`${inter.variable} ${outfit.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-background text-on_surface selection:bg-primary/30 selection:text-primary overflow-x-hidden">
-        <div className="ambient-glow-wrapper">
-          <div className="glow-blob glow-blob-1"></div>
-          <div className="glow-blob glow-blob-2"></div>
-          <div className="glow-blob glow-blob-3"></div>
-        </div>
+      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 selection:bg-blue-600/30 selection:text-blue-900 overflow-x-hidden">
         <AuthGuard>
           {children}
         </AuthGuard>

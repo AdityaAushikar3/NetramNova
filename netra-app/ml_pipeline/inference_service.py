@@ -148,7 +148,9 @@ def serialize_result(raw_result: dict) -> dict:
         recallAdvice=recall_advice,
         progressionRisk=progression_risk,
         csmeThreatDetected=csme_detected,
-        csmeFoveaDistanceDiscDiameters=0.45 if final_grade >= 2 else 1.8,
+        # CSME fovea distance: not directly measured by this pipeline.
+        # Set to 0.0 rather than fabricating a numeric value.
+        csmeFoveaDistanceDiscDiameters=0.0,  # No fovea-to-exudate distance detector available
         findings=findings,
         clinicalGuidance=guidance,
         qualityStatus="passed" if gradable else "warning",
@@ -200,27 +202,60 @@ def start_server(port: int = 5000):
         if request.method == "OPTIONS":
             return jsonify({"status": "ok"})
 
-        # Check if file was uploaded as multipart/form-data
-        if "file" in request.files:
-            file_storage = request.files["file"]
-            img_bytes = file_storage.read()
-            result = run_pipeline_on_image(image_bytes=img_bytes)
-            return jsonify(result)
+        try:
+            # Determine image source
+            img_bytes = None
+            image_path = None
 
-        # Check if JSON payload was sent (base64 or file path)
-        data = request.get_json(silent=True) or {}
-        if "image_path" in data:
-            result = run_pipeline_on_image(image_path=data["image_path"])
-            return jsonify(result)
-        elif "image_base64" in data:
-            raw_b64 = data["image_base64"]
-            if "," in raw_b64:
-                raw_b64 = raw_b64.split(",")[1]
-            img_bytes = base64.b64decode(raw_b64)
-            result = run_pipeline_on_image(image_bytes=img_bytes)
-            return jsonify(result)
+            if "file" in request.files:
+                file_storage = request.files["file"]
+                img_bytes = file_storage.read()
+                if not img_bytes or len(img_bytes) == 0:
+                    return jsonify({
+                        "ok": False,
+                        "stage": "validation",
+                        "code": "EMPTY_FILE",
+                        "message": "Uploaded file is empty"
+                    }), 400
+            else:
+                data = request.get_json(silent=True) or {}
+                if "image_path" in data:
+                    image_path = data["image_path"]
+                elif "image_base64" in data:
+                    raw_b64 = data["image_base64"]
+                    if "," in raw_b64:
+                        raw_b64 = raw_b64.split(",")[1]
+                    img_bytes = base64.b64decode(raw_b64)
+                else:
+                    return jsonify({
+                        "ok": False,
+                        "stage": "validation",
+                        "code": "NO_IMAGE",
+                        "message": "No valid image provided"
+                    }), 400
 
-        return jsonify({"error": "No valid image provided (expected 'file', 'image_path', or 'image_base64')"}), 400
+            # Run inference
+            result = run_pipeline_on_image(image_bytes=img_bytes, image_path=image_path)
+
+            # Check for quality gate rejection (returned as error dict)
+            if result.get("error"):
+                return jsonify({
+                    "ok": False,
+                    "stage": "quality_gate",
+                    "code": "IMAGE_QUALITY_REJECTED",
+                    "message": result["error"]
+                }), 422
+
+            return jsonify(result), 200
+
+        except Exception as exc:
+            app.logger.exception("Inference failed")
+            return jsonify({
+                "ok": False,
+                "stage": "ml_inference",
+                "code": type(exc).__name__,
+                "message": str(exc)
+            }), 500
 
     print("=" * 55)
     print(f" NetramNova AI Inference Server Running on Port {port}")

@@ -52,7 +52,7 @@ export default function LoginPage() {
           </div>
           <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">NETRAMNOVA</h1>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Retinal Screening Workstation • Telangana East PHC #04
+            Retinal Screening Workstation • NetramNova Workstation
           </p>
         </div>
 
@@ -165,11 +165,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Hint */}
-          <div className="border-t border-slate-800 pt-4 text-center text-xs text-slate-600 font-mono space-y-0.5">
-            <p>Health Worker PIN: <span className="text-slate-500">1234</span></p>
-            <p>Doctor PIN: <span className="text-slate-500">doctor2024</span></p>
-          </div>
+          
         </div>
 
         <p className="text-center text-xs text-slate-700 font-mono mt-4">

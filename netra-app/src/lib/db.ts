@@ -73,7 +73,52 @@ function saveDb(db: DatabaseSchema): void {
 
 // ── Screening Cases CRUD ─────────────────────────────────────────────────────
 
+
+function extractBase64AndSave(base64Data: string, prefix: string): string {
+  if (!base64Data) return base64Data;
+  if (base64Data.startsWith('/api/images/')) return base64Data;
+  if (base64Data.startsWith('http')) return base64Data;
+  
+  let data = base64Data;
+  let ext = 'jpg';
+  
+  if (base64Data.startsWith('data:image')) {
+    const matches = base64Data.match(/^data:(image\/\w+);base64,(.+)$/);
+    if (matches && matches.length === 3) {
+      ext = matches[1].split('/')[1] === 'png' ? 'png' : 'jpg';
+      data = matches[2];
+    }
+  }
+  
+  try {
+    const buffer = Buffer.from(data, 'base64');
+    const filename = `${prefix}_${Date.now()}.${ext}`;
+    const imagesDir = path.join(process.cwd(), 'data', 'images');
+    if (!fs.existsSync(imagesDir)) {
+      fs.mkdirSync(imagesDir, { recursive: true });
+    }
+    fs.writeFileSync(path.join(imagesDir, filename), buffer);
+    return `/api/images/${filename}`;
+  } catch (err) {
+    console.error('[NetramNova DB] Failed to save image to disk', err);
+    return base64Data; // fallback
+  }
+}
+
 export async function saveCase(c: ScreeningCase): Promise<void> {
+  // P1: Extract base64 images to filesystem before saving to db.json
+  if (c.imageUrl && c.imageUrl.length > 500) {
+    c.imageUrl = extractBase64AndSave(c.imageUrl, `${c.id}_original`);
+  }
+  if (c.result) {
+    if (c.result.preprocessedImage && c.result.preprocessedImage.length > 500) {
+      c.result.preprocessedImage = extractBase64AndSave(c.result.preprocessedImage, `${c.id}_preprocessed`);
+    }
+    if (c.result.gradcamOverlay && c.result.gradcamOverlay.length > 500) {
+      c.result.gradcamOverlay = extractBase64AndSave(c.result.gradcamOverlay, `${c.id}_gradcam`);
+    }
+  }
+
   const release = await acquireWriteLock();
   try {
     const db = loadDb();
@@ -83,6 +128,7 @@ export async function saveCase(c: ScreeningCase): Promise<void> {
     release();
   }
 }
+
 
 export function getCase(id: string): ScreeningCase | null {
   const db = loadDb();

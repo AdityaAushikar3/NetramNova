@@ -20,7 +20,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
   const [sex, setSex] = useState<'Male' | 'Female' | 'Other'>('Female');
   const [diabetesHistory, setDiabetesHistory] = useState<string>('Type 2 DM (8 years) • HbA1c 8.2%');
   const [cameraDevice, setCameraDevice] = useState<string>('Remidio NM-FOP');
-  const [phcLocation, setPhcLocation] = useState<string>('Telangana East PHC #04');
+  const [phcLocation, setPhcLocation] = useState<string>('NetramNova Workstation');
 
   // Reset all form fields to defaults
   const resetForm = () => {
@@ -29,7 +29,7 @@ export const NewPatientModal: React.FC<NewPatientModalProps> = ({
     setSex('Female');
     setDiabetesHistory('Type 2 DM (8 years) • HbA1c 8.2%');
     setCameraDevice('Remidio NM-FOP');
-    setPhcLocation('Telangana East PHC #04');
+    setPhcLocation('NetramNova Workstation');
   };
 
   const handleClose = () => {

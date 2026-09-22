@@ -61,7 +61,7 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
           className="text-blue-600 hover:text-blue-700 font-semibold text-sm flex items-center gap-1 w-fit transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back to Patients
+          Start New Screening
         </button>
         
         <div className="flex items-center justify-between">
@@ -265,13 +265,20 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
             </div>
             
             {onSendToDoctor && (
-              <div className="mt-6 pt-6 border-t border-slate-100">
+              <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col gap-3">
                 <button
                   onClick={() => onSendToDoctor(caseData.id)}
                   className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
                 >
                   <Activity className="w-4 h-4" />
                   Send to Doctor Review Queue
+                </button>
+                <button
+                  onClick={onRecapture}
+                  className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Start New Screening
                 </button>
               </div>
             )}

@@ -49,3 +49,5 @@ __pycache__/
 ml_pipeline/outputs/tmp/
 ml_pipeline/data/
 
+
+!.env.example

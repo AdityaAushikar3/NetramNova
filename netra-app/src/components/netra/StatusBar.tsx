@@ -68,7 +68,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
         <div className="hidden md:flex items-center gap-4 text-slate-300 font-mono text-xs">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            PHC: <strong className="text-slate-100 font-sans font-semibold">Telangana East #04</strong>
+            PHC: <strong className="text-slate-100 font-sans font-semibold">NetramNova Workstation</strong>
           </span>
           <span className="text-slate-600">•</span>
           <span className="flex items-center gap-1.5 text-slate-300">

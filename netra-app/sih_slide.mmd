@@ -1,0 +1,49 @@
+﻿graph LR
+    %% Data Input
+    subgraph 1 [1. Input]
+        IMG(Raw Retinal Image)
+    end
+
+    %% Preprocessing
+    subgraph 2 [2. Edge Processing]
+        QG(Quality Gate)
+        BG(Lighting Correction)
+        QG --> BG
+    end
+
+    %% AI Inference
+    subgraph 3 [3. Deep Learning]
+        ONNX[ONNX Accelerated CNN]
+    end
+
+    %% Clinical Audit
+    subgraph 4 [4. Human-Level Audit]
+        GCAM(Explainable Heatmap)
+        RULES{ETDRS Rule Engine}
+    end
+
+    %% Output
+    subgraph 5 [5. Output]
+        OUT(Verified Diagnosis & Report)
+    end
+
+    IMG --> QG
+    BG --> ONNX
+    ONNX --> GCAM
+    ONNX --> RULES
+    GCAM -.-> RULES
+    RULES --> OUT
+    
+    %% Styling for Presentation Slides
+    classDef default fill:#0f172a,stroke:#475569,stroke-width:2px,color:#fff,font-size:16px;
+    classDef input fill:#1e293b,stroke:#3b82f6,stroke-width:3px,color:#fff;
+    classDef processing fill:#1e293b,stroke:#8b5cf6,stroke-width:3px,color:#fff;
+    classDef ai fill:#1e293b,stroke:#10b981,stroke-width:3px,color:#fff;
+    classDef rules fill:#1e293b,stroke:#f43f5e,stroke-width:3px,color:#fff;
+    classDef output fill:#1e293b,stroke:#f59e0b,stroke-width:3px,color:#fff;
+    
+    class IMG input;
+    class QG,BG processing;
+    class ONNX ai;
+    class GCAM,RULES rules;
+    class OUT output;

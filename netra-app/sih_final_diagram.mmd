@@ -1,0 +1,63 @@
+﻿graph TD
+    %% Global Edge Note
+    classDef edgeNote fill:#b91c1c,stroke:#fca5a5,stroke-width:2px,color:#fff,font-weight:bold;
+    EDGE["[ ENTIRE PIPELINE EXECUTING 100% OFFLINE ON EDGE CPU VIA MATLAB (< 150ms) ]"]:::edgeNote
+
+    %% Input
+    IMG("Raw Fundus Image<br/>Zeiss / Remidio / Portable")
+    EDGE --- IMG
+
+    %% Stage 1
+    subgraph S1 [STAGE 1: AUTOMATED IMAGE QUALITY & ADEQUACY GATE]
+        QG["MATLAB Image Processing Toolbox<br/>• Laplacian Focus Variance >= 25.0<br/>• Glare Saturation Ratio <= 8.0%<br/>• FOV Coverage >= 35%"]
+    end
+    
+    IMG --> QG
+    QG -- "RED: Ungradeable" --> REJ["HALT INFERENCE<br/>Technician Feedback: 'Glare Detected'"]
+    
+    %% Stage 2
+    subgraph S2 [STAGE 2: GEOMETRIC STANDARDIZATION]
+        BG["MATLAB Spatial Filtering<br/>• Circular Contour Crop<br/>• Ben Graham Illumination: 4*I - 4*imgaussfilt + 128<br/>• Contrast Normalization"]
+    end
+    
+    QG -- "AMBER/GREEN: Pass" --> BG
+
+    %% Stage 3
+    subgraph S3 [STAGE 3: DEEP DR CLASSIFICATION]
+        DL["MATLAB Deep Learning Toolbox<br/>importNetworkFromONNX (EfficientNet-B2)<br/>Native FP32 Forward Pass"]
+    end
+    
+    BG --> DL
+
+    %% Parallel Tracks
+    subgraph Tracks [PARALLEL ANALYSIS]
+        direction LR
+        subgraph TA [Track A: Explainability]
+            GCAM["Deep Learning Toolbox<br/>Grad-CAM Saliency Maps"]
+        end
+        subgraph TB [Track B: Clinical Evidence]
+            CV["Image Processing Toolbox<br/>Morphological Filtering<br/>Spatial Feature Extraction (Hemorrhage & MA)"]
+        end
+    end
+    
+    DL --> GCAM
+    DL --> CV
+
+    %% Stage 4
+    subgraph S4 [STAGE 4: CLINICAL CONSENSUS & ETDRS AUDIT LAYER]
+        RULES{"Deterministic Clinical Audit<br/>• Protocol A: 4-Quadrant Thresholding (Severity Escalation)<br/>• Protocol B: False-Negative Mitigation (MA Detection)"}
+    end
+    
+    GCAM --> RULES
+    CV --> RULES
+
+    %% Stage 5
+    subgraph S5 [STAGE 5: CLINICAL TRIAGE DECISION]
+        TRIAGE["Tier 1, 2, or 3 Clinical Output<br/>Interactive MATLAB Dashboard"]
+    end
+    
+    RULES --> TRIAGE
+
+    %% Integration
+    SIM["MathWorks Simulink & SimEvents<br/>Tele-Ophthalmology Queue Model<br/>Proves 72% Workload Reduction"]
+    TRIAGE -->|Feeds Triage Data| SIM

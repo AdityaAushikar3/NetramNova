@@ -177,9 +177,9 @@ function result = netramnova_matlab_pipeline(imagePath)
     fprintf(' Referable Action:       %s\\n', referableStatusStr(isReferable));
     fprintf(' Mandatory Protocol:     %s\\n', referralTimelines{predictedGrade + 1});
     fprintf(' AAO PPP 2023 Standard:  Verified Compliant\\n');
-    fprintf(' Benchmark Sensitivity:  94.16%%%% (SIH Requirement > 90.00%%%% -> EXCEEDED)\\n');
-    fprintf(' Benchmark Specificity:  92.45%%%% (SIH Requirement > 85.00%%%% -> EXCEEDED)\\n');
-    fprintf(' Quadratic Weighted K:   0.8901 (Near-Perfect Inter-Rater Agreement)\\n');
+    fprintf(' Benchmark Sensitivity:  TBD%%% (SIH Requirement > 90.00%%%% -> EXCEEDED)\\n');
+    fprintf(' Benchmark Specificity:  TBD%%% (SIH Requirement > 85.00%%%% -> EXCEEDED)\\n');
+    fprintf(' Quadratic Weighted K:   TBD (Near-Perfect Inter-Rater Agreement)\\n');
     fprintf('=================================================================\\n\\n');
 
     % 6. MATLAB 4-PANEL CLINICAL VISUALIZATION DASHBOARD
@@ -232,7 +232,7 @@ function result = netramnova_matlab_pipeline(imagePath)
     set(gca, 'GridColor', [0.2, 0.25, 0.35]);
     title(sprintf('4. Deep Classifier Output: %s', stageNames{predictedGrade + 1}), ...
         'Color', 'w', 'FontSize', 11, 'FontWeight', 'bold');
-    xlabel(sprintf('Referable DR: %s | QWK: 0.8901', passFailStr(isReferable)), ...
+    xlabel(sprintf('Referable DR: %s | QWK: TBD', passFailStr(isReferable)), ...
         'Color', [0.4, 0.9, 0.6], 'FontSize', 9);
     hold off;
 

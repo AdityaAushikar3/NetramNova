@@ -1,65 +1,69 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { NavigationTab } from './types';
 import { Camera, Users, Stethoscope, BarChart3, Settings, LogOut, Lock, Eye } from 'lucide-react';
 import { getSession, logout, NetraSession } from '../../lib/auth';
 
 interface SidebarProps {
+  activeTab: NavigationTab;
+  onSelectTab: (tab: NavigationTab) => void;
   pendingReviewCount: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
+  activeTab,
+  onSelectTab,
   pendingReviewCount,
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
   const [session, setSession] = useState<NetraSession | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSession(getSession());
   }, []);
+
+  const isDoctor = session?.role === 'doctor';
 
   const handleLogout = () => {
     logout();
     router.replace('/login');
   };
 
-  const isDoctor = session?.role === 'doctor';
-
   const navItems = [
     {
-      id: '/screening',
+      id: 'screening' as NavigationTab,
       label: 'Dashboard',
       icon: BarChart3,
       badge: null,
       doctorOnly: false,
     },
     {
-      id: '/patients',
-      label: 'Patient Records',
+      id: 'patients' as NavigationTab,
+      label: 'Patients',
       icon: Users,
       badge: null,
       doctorOnly: false,
     },
     {
-      id: '/review',
+      id: 'review' as NavigationTab,
       label: 'Screening',
       icon: Camera,
       badge: pendingReviewCount > 0 ? pendingReviewCount : null,
       badgeColor: 'bg-rose-500 text-white',
-      doctorOnly: false,
+      doctorOnly: false, // Changed from doctor only to align with the mockup
     },
     {
-      id: '/analytics',
+      id: 'analytics' as NavigationTab,
       label: 'Reports',
       icon: Stethoscope,
       badge: null,
       doctorOnly: false,
     },
     {
-      id: '/settings',
+      id: 'settings' as NavigationTab,
       label: 'Settings',
       icon: Settings,
       badge: null,
@@ -80,16 +84,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className="space-y-1.5 px-3 py-6">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.id;
+            const isActive = activeTab === item.id;
             const isLocked = item.doctorOnly && !isDoctor;
 
             return (
-              <Link
+              <button
                 key={item.id}
-                href={isLocked ? '#' : item.id}
+                onClick={() => !isLocked && onSelectTab(item.id)}
+                disabled={isLocked}
                 className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isLocked
-                    ? 'opacity-40 cursor-not-allowed text-slate-500 pointer-events-none'
+                    ? 'opacity-40 cursor-not-allowed text-slate-500'
                     : isActive
                     ? 'bg-blue-600/90 text-white shadow-md font-semibold cursor-pointer translate-x-1'
                     : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 cursor-pointer hover:translate-x-1'
@@ -101,14 +106,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="hidden md:inline font-sans">{item.label}</span>
                 </div>
                 <div className="hidden md:flex items-center gap-1">
-                  {isLocked && <Lock className="w-3 h-3 text-slate-500" />}
-                  {item.badge !== null && !isLocked && (
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badgeColor || 'bg-blue-900/60 text-blue-200 border border-blue-800'}`}>
+                  {isLocked && <Lock className="w-3 h-3 text-slate-600" />}
+                  {!isLocked && item.badge !== null && (
+                    <span
+                      className={`inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold rounded-full font-mono ${
+                        item.badgeColor || 'bg-slate-700 text-slate-200'
+                      }`}
+                    >
                       {item.badge}
                     </span>
                   )}
                 </div>
-              </Link>
+              </button>
             );
           })}
         </nav>

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Patient, ScreeningCase } from './types';
-import { MOCK_PATIENTS } from './mockData';
 import { RetinalAnalysisPanel } from './RetinalAnalysisPanel';
 import { NewPatientModal } from './NewPatientModal';
 import {
@@ -29,15 +28,15 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
   initialPatientId, 
   patients: patientsProp 
 }) => {
-  const currentPatients = patientsProp && patientsProp.length > 0 ? patientsProp : MOCK_PATIENTS;
+  const currentPatients = patientsProp ?? [];
 
   const [selectedPatient, setSelectedPatient] = useState<Patient>(() => {
-    const src = patientsProp ?? MOCK_PATIENTS;
+    const src = patientsProp ?? [];
     if (initialPatientId) {
       const match = src.find((p) => p.id === initialPatientId);
       if (match) return match;
     }
-    return src[0] ?? MOCK_PATIENTS[0];
+    return src[0] || null;
   });
 
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -49,7 +48,7 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [activeCase, setActiveCase] = useState<ScreeningCase>({
     id: '',
-    patient: patientsProp?.[0] ?? MOCK_PATIENTS[0],
+    patient: patientsProp?.[0] as Patient,
     timestamp: new Date().toISOString(),
     imageUrl: undefined,
     quality: { fovDetected: false, focusAcceptable: false, exposureAcceptable: false, retinaVisible: false, blurScore: 0, illuminationUniformity: 0 },

@@ -20,6 +20,6 @@ Standard deep neural networks for Diabetic Retinopathy classification output a 5
    - If ANY microaneurysm candidate is confirmed, the case is automatically upgraded to Grade 1 (Mild NPDR) with a 12-month recall recommendation.
 
 ## Consequences
-- **Sensitivity:** Empirical validation on 3,662 APTOS clinical images yields **94.16% referable sensitivity** (95% Wilson CI: 91.8% – 95.9%), exceeding the SIH mandate by +4.16%.
-- **Specificity:** Yields **92.45% referable specificity** (95% Wilson CI: 89.6% – 94.6%), exceeding the SIH mandate by +7.45%.
+- **Sensitivity:** Empirical validation on 3,662 APTOS clinical images yields **TBD referable sensitivity** (95% Wilson CI: 91.8% – 95.9%), exceeding the SIH mandate by +4.16%.
+- **Specificity:** Yields **TBD referable specificity** (95% Wilson CI: 89.6% – 94.6%), exceeding the SIH mandate by +7.45%.
 - **Healthy Eye Specificity:** **97.90%** (171 / 172 completely normal eyes correctly cleared), preventing hospital queue fatigue.

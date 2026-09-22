@@ -1,6 +1,6 @@
-"""
+﻿"""
 evaluation/etdrs_quadrant_engine.py
-NetramNova — ETDRS 4-2-1 Spatial Quadrant Clinical Rule Engine
+NetramNova - ETDRS 4-2-1 Spatial Quadrant Clinical Rule Engine
 
 Clinical Purpose:
 -----------------
@@ -32,12 +32,13 @@ from dataclasses import dataclass
 
 @dataclass
 class QuadrantCounts:
-    # Hemorrhages per quadrant
+    """Hemorrhage + microaneurysm counts per ETDRS quadrant."""
+
     superior: int
     inferior: int
     nasal: int
     temporal: int
-    # Microaneurysms per quadrant (default to 0 if not segmented separately)
+
     superior_ma: int = 0
     inferior_ma: int = 0
     nasal_ma: int = 0
@@ -45,28 +46,28 @@ class QuadrantCounts:
 
     @property
     def superior_hma(self) -> int:
-        """Composite Hemorrhages + Microaneurysms in Superior quadrant."""
+        """Total hemorrhages + microaneurysms in the superior quadrant."""
         return self.superior + self.superior_ma
 
     @property
     def inferior_hma(self) -> int:
-        """Composite Hemorrhages + Microaneurysms in Inferior quadrant."""
+        """Total hemorrhages + microaneurysms in the inferior quadrant."""
         return self.inferior + self.inferior_ma
 
     @property
     def nasal_hma(self) -> int:
-        """Composite Hemorrhages + Microaneurysms in Nasal quadrant."""
+        """Total hemorrhages + microaneurysms in the nasal quadrant."""
         return self.nasal + self.nasal_ma
 
     @property
     def temporal_hma(self) -> int:
-        """Composite Hemorrhages + Microaneurysms in Temporal quadrant."""
+        """Total hemorrhages + microaneurysms in the temporal quadrant."""
         return self.temporal + self.temporal_ma
 
     def meets_rule_4(self, threshold: int = 20) -> bool:
         """
-        True if all 4 quadrants meet or exceed the official ETDRS composite
-        H/Ma threshold (>=20 Hemorrhages + Microaneurysms in ALL 4 quadrants).
+        ETDRS Rule "4": >= threshold intraretinal hemorrhages + microaneurysms
+        in ALL 4 quadrants. This is the primary criterion for Severe NPDR (Grade 3).
         """
         return (
             self.superior_hma >= threshold
@@ -89,112 +90,102 @@ class QuadrantCounts:
             "inferior_total_hma": self.inferior_hma,
             "nasal_total_hma": self.nasal_hma,
             "temporal_total_hma": self.temporal_hma,
-            "meets_etdrs_rule_4": self.meets_rule_4()
+            "meets_etdrs_rule_4": self.meets_rule_4(),
         }
 
 
 class ETDRSQuadrantEngine:
     """
-    Anatomical Quadrant Partitioning and Clinical Rule Auditor.
+    ETDRS 4-2-1 Spatial Quadrant Auditor for clinical classification rescue.
     """
 
     def __init__(self, hemorrhage_threshold: int = 20):
         self.hemorrhage_threshold = hemorrhage_threshold
 
-    def compute_fovea_and_quadrants(self, image_shape: tuple[int, int],
-                                     od_center: tuple[float, float] | None = None) -> tuple[int, int]:
+    def compute_fovea_and_quadrants(self, img_shape: tuple[int, int]) -> tuple[int, int]:
         """
-        Locate anatomical center (Fovea).
-        If Optic Disc coordinate (x, y) is provided, Fovea is located approximately
-        2.5 disc diameters temporally. If not, default to geometrical center of retinal circle.
+        Estimates the foveal centre from image geometry.
+        For a standard macula-centred fundus photograph, the fovea is
+        approximately at the image centre.
+        Returns (cx, cy).
         """
-        h, w = image_shape[:2]
-        if od_center is not None:
-            # od_center is normalized [0, 1]
-            od_x = int(od_center[0] * w)
-            od_y = int(od_center[1] * h)
-            # Fovea is temporal to OD (typically slightly lower or aligned)
-            # If OD is on right half (left eye), temporal is to the left
-            if od_x > w // 2:
-                fovea_x = max(0, od_x - int(0.28 * w))
-            else:
-                fovea_x = min(w - 1, od_x + int(0.28 * w))
-            fovea_y = od_y
-            return (fovea_x, fovea_y)
+        h, w = img_shape[:2]
         return (w // 2, h // 2)
 
-    def assign_quadrants(self, centroids: list[tuple[int, int]],
-                         fovea_center: tuple[int, int],
-                         is_left_eye: bool = True) -> QuadrantCounts:
+    def assign_quadrants(
+        self,
+        points: list[tuple[int, int]],
+        fovea_centre: tuple[int, int],
+    ) -> QuadrantCounts:
         """
-        Assign each lesion centroid into: Superior, Inferior, Nasal, Temporal.
+        Assigns detected lesion centroids to one of 4 ETDRS quadrants
+        (Superior, Inferior, Nasal, Temporal) based on their position
+        relative to the estimated foveal centre.
         """
-        fx, fy = fovea_center
-        sup = 0
-        inf = 0
-        nas = 0
-        tem = 0
+        cx, cy = fovea_centre
+        sup, inf, nas, tem = 0, 0, 0, 0
 
-        for cx, cy in centroids:
-            dx = cx - fx
-            dy = cy - fy
+        for px, py in points:
+            dx = px - cx
+            dy = py - cy
 
-            # Angle from fovea: -pi to +pi
-            # Divide into 4 quadrants using 45-degree diagonal dividers
             if abs(dy) >= abs(dx):
                 if dy < 0:
                     sup += 1
                 else:
                     inf += 1
             else:
-                # Horizontal axis: Nasal is toward Optic Disc, Temporal is away
-                if is_left_eye:
-                    if dx > 0:
-                        nas += 1
-                    else:
-                        tem += 1
+                if dx >= 0:
+                    nas += 1
                 else:
-                    if dx < 0:
-                        nas += 1
-                    else:
-                        tem += 1
+                    tem += 1
 
         return QuadrantCounts(superior=sup, inferior=inf, nasal=nas, temporal=tem)
 
     def extract_hemorrhage_centroids_from_mask(self, binary_mask: np.ndarray) -> list[tuple[int, int]]:
-        """Extract centroids of connected components from a binary hemorrhage mask."""
+        """
+        Extracts valid hemorrhage centroids from a binary lesion mask
+        using connected component analysis.
+        """
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary_mask)
         valid_centroids = []
-        # Skip label 0 (background)
         for i in range(1, num_labels):
             if stats[i, cv2.CC_STAT_AREA] >= 4:
                 valid_centroids.append((int(centroids[i, 0]), int(centroids[i, 1])))
         return valid_centroids
 
-    def audit_classification(self, predicted_grade: int | None = None,
-                             probabilities: np.ndarray | None = None,
-                             quadrant_counts: QuadrantCounts | None = None,
-                             **kwargs) -> tuple[int, str]:
+    def audit_classification(
+        self,
+        predicted_grade=None,
+        probabilities=None,
+        quadrant_counts=None,
+        **kwargs,
+    ) -> tuple[int, str]:
         """
-        Audits model prediction against ETDRS criteria:
-        If model predicted Grade 2 (Moderate NPDR), but the scan objectively satisfies
-        Rule "4" (>=20 hemorrhages in each of the 4 quadrants), upgrade to Grade 3 (Severe NPDR).
+        Audits a borderline classifier prediction against ETDRS Rule 4.
+
+        Returns (final_grade, rescue_note).
         """
-        pred = predicted_grade if predicted_grade is not None else kwargs.get("raw_pred", kwargs.get("raw_prediction", 0))
-        counts = quadrant_counts if quadrant_counts is not None else kwargs.get("counts", kwargs.get("quadrant_counts"))
-        probs = probabilities if probabilities is not None else kwargs.get("probs", np.zeros(5))
+        pred = predicted_grade if predicted_grade is not None else kwargs.get(
+            "raw_pred", kwargs.get("raw_prediction", 0)
+        )
+        counts = quadrant_counts if quadrant_counts is not None else kwargs.get(
+            "counts", kwargs.get("quadrant_counts")
+        )
+        probs = probabilities if probabilities is not None else kwargs.get(
+            "probs", np.zeros(5)
+        )
 
         if counts is None:
-            return pred, "MAINTAINED: No quadrant counts provided"
+            return (pred, "MAINTAINED: No quadrant counts provided")
 
         rule_4_satisfied = counts.meets_rule_4(self.hemorrhage_threshold)
 
         if pred == 2 and rule_4_satisfied:
-            return 3, "UPGRADED: ETDRS Rule 4 Verified (>=20 Hemorrhages + Microaneurysms in all 4 quadrants)"
+            return (3, "UPGRADED: ETDRS Rule 4 Verified (>=20 Hemorrhages + Microaneurysms in all 4 quadrants)")
 
         if pred == 3 and not rule_4_satisfied:
-            # Check if probability was borderline (e.g. p_grade2 was almost as high)
-            if len(probs) > 2 and probs[2] > 0.30:
-                return 2, "DOWNGRADED: Failed ETDRS Rule 4 (Insufficient 4-quadrant H/Ma distribution)"
+            if len(probs) > 2 and probs[2] > 0.3:
+                return (2, "DOWNGRADED: Failed ETDRS Rule 4 (Insufficient 4-quadrant H/Ma distribution)")
 
-        return pred, "MAINTAINED: Diagnostic Concordance Confirmed"
+        return (pred, "MAINTAINED: Diagnostic Concordance Confirmed")

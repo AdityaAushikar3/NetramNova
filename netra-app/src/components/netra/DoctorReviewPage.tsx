@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { ScreeningCase } from './types';
-import { MOCK_CASES } from './mockData';
 import { FundusCanvas } from './FundusCanvas';
 import {
   Stethoscope,
@@ -28,14 +27,14 @@ export const DoctorReviewPage: React.FC<DoctorReviewPageProps> = ({
   // UI-1 FIX: Only fall back to MOCK_CASES when propCases is truly empty (length 0),
   // not just undefined. An empty real array is falsy-equivalent but truthy, so
   // the old `propCases || MOCK_CASES` would never trigger for an empty DB.
-  const cases = (propCases && propCases.length > 0) ? propCases : MOCK_CASES;
+  const cases = propCases ?? [];
   const [selectedCaseId, setSelectedCaseId] = useState<string>(cases[0]?.id || '');
   const [activeQueueTab, setActiveQueueTab] = useState<'high' | 'standard'>('high');
 
   // Decision form state
   const [decision, setDecision] = useState<'approved' | 'overruled' | 'recapture_requested'>('approved');
   const [overruleGrade, setOverruleGrade] = useState<string>('Moderate NPDR');
-  const [notes, setNotes] = useState<string>('Confirmed findings of temporal MAs and perimacular hard exudates. Recommend 6-month follow-up.');
+  const [notes, setNotes] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
   const selectedCase = cases.find((c) => c.id === selectedCaseId) || cases[0];

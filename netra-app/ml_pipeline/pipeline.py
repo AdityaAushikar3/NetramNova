@@ -8,7 +8,8 @@ import cv2
 import torch
 import timm
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
+import io
 
 try:
     from evaluation.clinical_guidelines import get_deterministic_clinical_guidance
@@ -99,6 +100,46 @@ class NetramPipeline:
         q_counts = self.etdrs_engine.assign_quadrants(pts, fovea_pt)
         return q_counts, lesions
 
+    @staticmethod
+    def _load_bgr_exif_corrected(image_bytes: bytes | None = None, image_path: str | None = None) -> np.ndarray | None:
+        """
+        Decode an uploaded fundus photo into a BGR numpy array whose pixel grid
+        matches what a browser <img>/<canvas> will actually display.
+
+        cv2.imread/imdecode ignore the EXIF "Orientation" tag entirely and return
+        the raw, un-rotated pixel grid. Browsers (Chrome/Firefox/Safari) DO apply
+        EXIF orientation when decoding JPEGs for display. Since the frontend shows
+        the original file as a data: URL and overlays lesion markers using
+        percentages computed against cv2's (un-rotated) width/height, any photo
+        carrying orientation metadata (extremely common for phone/clip-on fundus
+        camera captures) causes every marker to land in the wrong place relative
+        to what the user sees - typically off by a 90/180/270 degree rotation or
+        a mirror flip.
+
+        Fix: normalize orientation with PIL (which does honor EXIF) BEFORE any
+        width/height is measured or any crop offset is computed, so every
+        downstream pixel coordinate agrees with the rotated image the browser
+        renders.
+        """
+        try:
+            if image_bytes is not None:
+                pil_img = Image.open(io.BytesIO(image_bytes))
+            elif image_path is not None:
+                pil_img = Image.open(image_path)
+            else:
+                raise ValueError("Either image_bytes or image_path must be provided")
+
+            # Bake the EXIF orientation into the actual pixel data and drop the tag,
+            # so every later consumer (cv2, and the browser re-reading these bytes)
+            # agrees on what "up" means.
+            pil_img = ImageOps.exif_transpose(pil_img)
+            pil_img = pil_img.convert("RGB")
+
+            rgb = np.array(pil_img)
+            return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+        except Exception:
+            return None
+
     def analyze(self, image_bytes: bytes | None = None, image_path: str | None = None) -> tuple[dict | None, dict]:
         """
         Returns (error_dict, None) if failed, else (None, raw_result_dict)
@@ -106,13 +147,10 @@ class NetramPipeline:
         """
         self._ensure_model_loaded()
 
-        if image_bytes is not None:
-            nparr = np.frombuffer(image_bytes, np.uint8)
-            img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        elif image_path is not None:
-            img_bgr = cv2.imread(image_path)
-        else:
+        if image_bytes is None and image_path is None:
             raise ValueError("Either image_bytes or image_path must be provided")
+
+        img_bgr = self._load_bgr_exif_corrected(image_bytes=image_bytes, image_path=image_path)
 
         if img_bgr is None:
             return {"error": "Could not decode fundus image file"}, {}

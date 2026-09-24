@@ -6474,6 +6474,325 @@
           "safetyAuditPassed": true
         }
       }
+    },
+    "CASE-1790100413801-7YLT": {
+      "id": "CASE-1790100413801-7YLT",
+      "patient": {
+        "id": "PT-8842",
+        "name": "Lakshmi Bai",
+        "age": 58,
+        "sex": "Female",
+        "diabetesHistory": "Type 2 DM (11 years) • HbA1c 8.4%",
+        "cameraDevice": "Remidio NM-FOP",
+        "lastScreeningDate": "2025-03-12",
+        "phcLocation": "Telangana East PHC #04"
+      },
+      "timestamp": "2026-09-22T18:06:53.801Z",
+      "imageUrl": "/api/images/CASE-1790100413801-7YLT_original_1790100413819.jpg",
+      "status": "completed",
+      "quality": {
+        "blurScore": 1,
+        "exposureAcceptable": true,
+        "focusAcceptable": true,
+        "fovDetected": true,
+        "illuminationUniformity": 1,
+        "qualityTier": "GREEN",
+        "retinaVisible": true,
+        "route": "direct_pass",
+        "technicianFeedback": "OPTIMAL: Sharp focus, uniform illumination, and centered retinal field. Direct pass to classifier."
+      },
+      "qualityStatus": "passed",
+      "synced": false,
+      "doctorReviewStatus": "pending",
+      "result": {
+        "diagnosis": "No Apparent Diabetic Retinopathy",
+        "icdrLevel": 0,
+        "severity": "normal",
+        "confidence": "Medium",
+        "confidenceScore": 71.1,
+        "triageTier": "Tier 1 (Auto-Cleared)",
+        "findings": [],
+        "progressionRisk": 5,
+        "recallAdvice": "12 Months",
+        "csmeThreatDetected": false,
+        "csmeFoveaDistanceDiscDiameters": 0,
+        "gradcamOverlay": "/api/images/CASE-1790100413801-7YLT_gradcam_1790100413821.jpg",
+        "preprocessedImage": "/api/images/CASE-1790100413801-7YLT_preprocessed_1790100413820.jpg",
+        "probabilities": {
+          "Mild Non-Proliferative Diabetic Retinopathy": 6.1,
+          "Moderate Non-Proliferative Diabetic Retinopathy": 18.3,
+          "No Apparent Diabetic Retinopathy": 71.1,
+          "Proliferative Diabetic Retinopathy": 3.1,
+          "Severe Non-Proliferative Diabetic Retinopathy": 1.3
+        },
+        "rescuedBy": null,
+        "clinicalGuidance": {
+          "doctorTechnicalNote": "Diagnosis: No Apparent Diabetic Retinopathy. AAO PPP Guideline Table 4.1: Patients with diabetes but no visible retinopathy require annual dilated fundus examinations. Emphasize strict glycemic target (HbA1c < 7.0%), blood pressure control (< 130/80 mmHg), and lipid management. No immediate ophthalmic intervention or tertiary hospital referral is required.",
+          "guidelineSource": "AAO Preferred Practice Pattern (PPP 2023) & AIIMS Guidelines",
+          "icd10Code": "E11.9 / Z13.5",
+          "patientSummaryEn": "Good news: Your retina examination shows no signs of diabetic damage at this time. Your blood vessels appear clear and healthy. To protect your vision, keep your blood sugar and blood pressure under control, and return for your next routine eye check in 12 months.",
+          "patientSummaryHi": "अच्छी खबर: आपकी आँख के पर्दे (रेटिना) में मधुमेह का कोई नुकसान नहीं पाया गया है। खून की नसें स्वस्थ हैं। अपनी दृष्टि को सुरक्षित रखने के लिए शुगर और ब्लड प्रेशर को नियंत्रित रखें, और 12 महीने बाद अपनी अगली नियमित आँख की जांच करवाएं।",
+          "referralTimeline": "Annual follow-up in 12 months at Primary Health Centre (PHC)",
+          "safetyAuditPassed": true
+        }
+      }
+    },
+    "CASE-1790156118638-AKO9": {
+      "id": "CASE-1790156118638-AKO9",
+      "patient": {
+        "id": "PT-8842",
+        "name": "Lakshmi Bai",
+        "age": 58,
+        "sex": "Female",
+        "diabetesHistory": "Type 2 DM (11 years) • HbA1c 8.4%",
+        "cameraDevice": "Remidio NM-FOP",
+        "lastScreeningDate": "2025-03-12",
+        "phcLocation": "Telangana East PHC #04"
+      },
+      "timestamp": "2026-09-23T09:35:18.638Z",
+      "imageUrl": "/api/images/CASE-1790156118638-AKO9_original_1790156118670.jpg",
+      "status": "completed",
+      "quality": {
+        "blurScore": 1,
+        "exposureAcceptable": true,
+        "focusAcceptable": true,
+        "fovDetected": true,
+        "illuminationUniformity": 1,
+        "qualityTier": "GREEN",
+        "retinaVisible": true,
+        "route": "direct_pass",
+        "technicianFeedback": "OPTIMAL: Sharp focus, uniform illumination, and centered retinal field. Direct pass to classifier."
+      },
+      "qualityStatus": "passed",
+      "synced": false,
+      "doctorReviewStatus": "pending",
+      "result": {
+        "diagnosis": "No Apparent Diabetic Retinopathy",
+        "icdrLevel": 0,
+        "severity": "normal",
+        "confidence": "Medium",
+        "confidenceScore": 71.1,
+        "triageTier": "Tier 1 (Auto-Cleared)",
+        "findings": [],
+        "progressionRisk": 5,
+        "recallAdvice": "12 Months",
+        "csmeThreatDetected": false,
+        "csmeFoveaDistanceDiscDiameters": 0,
+        "gradcamOverlay": "/api/images/CASE-1790156118638-AKO9_gradcam_1790156118674.jpg",
+        "preprocessedImage": "/api/images/CASE-1790156118638-AKO9_preprocessed_1790156118673.jpg",
+        "probabilities": {
+          "Mild Non-Proliferative Diabetic Retinopathy": 6.1,
+          "Moderate Non-Proliferative Diabetic Retinopathy": 18.3,
+          "No Apparent Diabetic Retinopathy": 71.1,
+          "Proliferative Diabetic Retinopathy": 3.1,
+          "Severe Non-Proliferative Diabetic Retinopathy": 1.3
+        },
+        "rescuedBy": null,
+        "clinicalGuidance": {
+          "doctorTechnicalNote": "Diagnosis: No Apparent Diabetic Retinopathy. AAO PPP Guideline Table 4.1: Patients with diabetes but no visible retinopathy require annual dilated fundus examinations. Emphasize strict glycemic target (HbA1c < 7.0%), blood pressure control (< 130/80 mmHg), and lipid management. No immediate ophthalmic intervention or tertiary hospital referral is required.",
+          "guidelineSource": "AAO Preferred Practice Pattern (PPP 2023) & AIIMS Guidelines",
+          "icd10Code": "E11.9 / Z13.5",
+          "patientSummaryEn": "Good news: Your retina examination shows no signs of diabetic damage at this time. Your blood vessels appear clear and healthy. To protect your vision, keep your blood sugar and blood pressure under control, and return for your next routine eye check in 12 months.",
+          "patientSummaryHi": "अच्छी खबर: आपकी आँख के पर्दे (रेटिना) में मधुमेह का कोई नुकसान नहीं पाया गया है। खून की नसें स्वस्थ हैं। अपनी दृष्टि को सुरक्षित रखने के लिए शुगर और ब्लड प्रेशर को नियंत्रित रखें, और 12 महीने बाद अपनी अगली नियमित आँख की जांच करवाएं।",
+          "referralTimeline": "Annual follow-up in 12 months at Primary Health Centre (PHC)",
+          "safetyAuditPassed": true
+        }
+      }
+    },
+    "CASE-1790156430769-FAUB": {
+      "id": "CASE-1790156430769-FAUB",
+      "patient": {
+        "id": "PT-8842",
+        "name": "Lakshmi Bai",
+        "age": 58,
+        "sex": "Female",
+        "diabetesHistory": "Type 2 DM (11 years) • HbA1c 8.4%",
+        "cameraDevice": "Remidio NM-FOP",
+        "lastScreeningDate": "2025-03-12",
+        "phcLocation": "Telangana East PHC #04"
+      },
+      "timestamp": "2026-09-23T09:40:30.769Z",
+      "imageUrl": "/api/images/CASE-1790156430769-FAUB_original_1790156430806.jpg",
+      "status": "completed",
+      "quality": {
+        "blurScore": 1,
+        "exposureAcceptable": true,
+        "focusAcceptable": true,
+        "fovDetected": true,
+        "illuminationUniformity": 1,
+        "qualityTier": "GREEN",
+        "retinaVisible": true,
+        "route": "direct_pass",
+        "technicianFeedback": "OPTIMAL: Sharp focus, uniform illumination, and centered retinal field. Direct pass to classifier."
+      },
+      "qualityStatus": "passed",
+      "synced": false,
+      "doctorReviewStatus": "pending",
+      "result": {
+        "diagnosis": "Proliferative Diabetic Retinopathy",
+        "icdrLevel": 4,
+        "severity": "proliferative",
+        "confidence": "Medium",
+        "confidenceScore": 69.5,
+        "triageTier": "Tier 3 (Specialist Escalation)",
+        "findings": [
+          {
+            "category": "structural",
+            "coords": [
+              {
+                "radius": 1.74,
+                "x": 38.87,
+                "y": 6.61
+              },
+              {
+                "radius": 1.74,
+                "x": 41.8,
+                "y": 7.78
+              },
+              {
+                "radius": 1.74,
+                "x": 35.74,
+                "y": 8.56
+              },
+              {
+                "radius": 1.74,
+                "x": 37.5,
+                "y": 9.92
+              },
+              {
+                "radius": 1.74,
+                "x": 41.21,
+                "y": 10.31
+              },
+              {
+                "radius": 1.74,
+                "x": 58.59,
+                "y": 10.7
+              },
+              {
+                "radius": 1.74,
+                "x": 60.35,
+                "y": 10.89
+              },
+              {
+                "radius": 1.74,
+                "x": 79.1,
+                "y": 11.87
+              },
+              {
+                "radius": 1.74,
+                "x": 87.11,
+                "y": 11.87
+              },
+              {
+                "radius": 1.74,
+                "x": 76.56,
+                "y": 12.06
+              },
+              {
+                "radius": 1.74,
+                "x": 81.05,
+                "y": 12.84
+              },
+              {
+                "radius": 1.74,
+                "x": 77.73,
+                "y": 13.62
+              }
+            ],
+            "count": 423,
+            "id": "f-vasc-pdr",
+            "locationDescription": "Neovascularization elsewhere (NVE) and preretinal fibrovascular proliferation (423 active foci)",
+            "name": "Vascular Abnormalities",
+            "severity": "severe"
+          }
+        ],
+        "progressionRisk": 96,
+        "recallAdvice": "3 Months (Urgent)",
+        "csmeThreatDetected": false,
+        "csmeFoveaDistanceDiscDiameters": 0,
+        "gradcamOverlay": "/api/images/CASE-1790156430769-FAUB_gradcam_1790156430810.jpg",
+        "preprocessedImage": "/api/images/CASE-1790156430769-FAUB_preprocessed_1790156430808.jpg",
+        "probabilities": {
+          "Mild Non-Proliferative Diabetic Retinopathy": 0.5,
+          "Moderate Non-Proliferative Diabetic Retinopathy": 20.4,
+          "No Apparent Diabetic Retinopathy": 1.2,
+          "Proliferative Diabetic Retinopathy": 69.5,
+          "Severe Non-Proliferative Diabetic Retinopathy": 8.4
+        },
+        "rescuedBy": null,
+        "clinicalGuidance": {
+          "doctorTechnicalNote": "Diagnosis: Proliferative Diabetic Retinopathy (PDR). AAO PPP Section 5.1 & ICO Protocol: High-risk PDR is a sight-threatening ophthalmic emergency. Immediate referral within 24 to 48 hours for urgent intervention. Primary treatment consists of prompt Panretinal Photocoagulation (PRP) and/or intravitreal anti-VEGF injections (e.g., Aflibercept / Ranibizumab). If dense non-clearing vitreous hemorrhage or tractional detachment is present, urgent pars plana vitrectomy is indicated.",
+          "guidelineSource": "AAO Preferred Practice Pattern (PPP 2023) & AIIMS Guidelines",
+          "icd10Code": "E11.359",
+          "patientSummaryEn": "Sight-threatening emergency: Fragile abnormal new blood vessels have grown inside your eye and pose an immediate risk of severe bleeding and permanent blindness. Go to the nearest eye hospital or district medical college within 24 to 48 hours for emergency laser or injection treatment.",
+          "patientSummaryHi": "आपातकालीन स्थिति (अति गंभीर): आपकी आँख में नाजुक नई नसें उग आई हैं, जिनके फटने से आँख के भीतर भारी ब्लीडिंग और हमेशा के लिए अंधापन आने का खतरा है। तुरंत (24 से 48 घंटे के भीतर) नजदीकी मेडिकल कॉलेज या आँख के बड़े अस्पताल जाएं और आपातकालीन लेजर या इंजेक्शन का इलाज करवाएं।",
+          "referralTimeline": "Emergent hospital referral within 24 to 48 hours",
+          "safetyAuditPassed": true
+        }
+      }
+    },
+    "CASE-1790156711088-EIDV": {
+      "id": "CASE-1790156711088-EIDV",
+      "patient": {
+        "id": "PT-8842",
+        "name": "Lakshmi Bai",
+        "age": 58,
+        "sex": "Female",
+        "diabetesHistory": "Type 2 DM (11 years) • HbA1c 8.4%",
+        "cameraDevice": "Remidio NM-FOP",
+        "lastScreeningDate": "2025-03-12",
+        "phcLocation": "Telangana East PHC #04"
+      },
+      "timestamp": "2026-09-23T09:45:11.088Z",
+      "imageUrl": "/api/images/CASE-1790156711088-EIDV_original_1790156711118.jpg",
+      "status": "completed",
+      "quality": {
+        "blurScore": 1,
+        "exposureAcceptable": true,
+        "focusAcceptable": true,
+        "fovDetected": true,
+        "illuminationUniformity": 1,
+        "qualityTier": "GREEN",
+        "retinaVisible": true,
+        "route": "direct_pass",
+        "technicianFeedback": "OPTIMAL: Sharp focus, uniform illumination, and centered retinal field. Direct pass to classifier."
+      },
+      "qualityStatus": "passed",
+      "synced": false,
+      "doctorReviewStatus": "pending",
+      "result": {
+        "diagnosis": "No Apparent Diabetic Retinopathy",
+        "icdrLevel": 0,
+        "severity": "normal",
+        "confidence": "High",
+        "confidenceScore": 93.5,
+        "triageTier": "Tier 1 (Auto-Cleared)",
+        "findings": [],
+        "progressionRisk": 5,
+        "recallAdvice": "12 Months",
+        "csmeThreatDetected": false,
+        "csmeFoveaDistanceDiscDiameters": 0,
+        "gradcamOverlay": "/api/images/CASE-1790156711088-EIDV_gradcam_1790156711123.jpg",
+        "preprocessedImage": "/api/images/CASE-1790156711088-EIDV_preprocessed_1790156711120.jpg",
+        "probabilities": {
+          "Mild Non-Proliferative Diabetic Retinopathy": 1.3,
+          "Moderate Non-Proliferative Diabetic Retinopathy": 2.6,
+          "No Apparent Diabetic Retinopathy": 93.5,
+          "Proliferative Diabetic Retinopathy": 1.5,
+          "Severe Non-Proliferative Diabetic Retinopathy": 1.1
+        },
+        "rescuedBy": null,
+        "clinicalGuidance": {
+          "doctorTechnicalNote": "Diagnosis: No Apparent Diabetic Retinopathy. AAO PPP Guideline Table 4.1: Patients with diabetes but no visible retinopathy require annual dilated fundus examinations. Emphasize strict glycemic target (HbA1c < 7.0%), blood pressure control (< 130/80 mmHg), and lipid management. No immediate ophthalmic intervention or tertiary hospital referral is required.",
+          "guidelineSource": "AAO Preferred Practice Pattern (PPP 2023) & AIIMS Guidelines",
+          "icd10Code": "E11.9 / Z13.5",
+          "patientSummaryEn": "Good news: Your retina examination shows no signs of diabetic damage at this time. Your blood vessels appear clear and healthy. To protect your vision, keep your blood sugar and blood pressure under control, and return for your next routine eye check in 12 months.",
+          "patientSummaryHi": "अच्छी खबर: आपकी आँख के पर्दे (रेटिना) में मधुमेह का कोई नुकसान नहीं पाया गया है। खून की नसें स्वस्थ हैं। अपनी दृष्टि को सुरक्षित रखने के लिए शुगर और ब्लड प्रेशर को नियंत्रित रखें, और 12 महीने बाद अपनी अगली नियमित आँख की जांच करवाएं।",
+          "referralTimeline": "Annual follow-up in 12 months at Primary Health Centre (PHC)",
+          "safetyAuditPassed": true
+        }
+      }
     }
   },
   "patients": {

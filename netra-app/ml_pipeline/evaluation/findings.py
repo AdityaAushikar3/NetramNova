@@ -1,4 +1,4 @@
-﻿"""
+"""
 evaluation/findings.py
 NetramNova - Clinical Findings Generator and Triage Engine
 
@@ -25,7 +25,7 @@ from ml_pipeline.evaluation.etdrs_quadrant_engine import QuadrantCounts
 
 def generate_findings_and_triage(
     final_grade: int,
-    q_counts: QuadrantCounts,
+    q_counts: QuadrantCounts | None,
     lesions_count: int,
     scaled_coords: List[dict],
 ) -> tuple[str, str, int, List[FindingDetail]]:
@@ -42,9 +42,29 @@ def generate_findings_and_triage(
         Tier 3 (Specialist Escalation) - Grade 3-4, high/urgent risk
     """
 
+    def get_location_description(prefix: str) -> str:
+        if q_counts is None:
+            return prefix
+        return f"{prefix}: Sup={q_counts.superior}, Inf={q_counts.inferior}, Nas={q_counts.nasal}, Temp={q_counts.temporal}"
+
+    def create_generic_lesion_finding(coords: List[dict], severity: str, prefix_desc: str) -> FindingDetail | None:
+        if not coords:
+            return None
+        return FindingDetail(
+            id=f"f-dark-blob-{severity}",
+            name="Dark Lesion Candidate (unclassified)",
+            count=len(coords),
+            severity=severity,
+            category="structural",
+            locationDescription=get_location_description(prefix_desc),
+            coords=coords,
+        )
+
     # ── Grade 0: No Apparent DR ──────────────────────────────────────────
     if final_grade == 0:
         return ("Tier 1 (Auto-Cleared)", "12 Months", 5, [])
+
+    findings = []
 
     # ── Grade 1: Mild NPDR ───────────────────────────────────────────────
     if final_grade == 1:
@@ -52,25 +72,8 @@ def generate_findings_and_triage(
         recall_advice = "12 Months"
         progression_risk = 22
 
-        # Report ACTUALLY detected microaneurysms
-        findings = [
-            FindingDetail(
-                id="f-ma-1",
-                name="Microaneurysms",
-                count=max(1, lesions_count),
-                severity="mild",
-                category="structural",
-                locationDescription=(
-                    f"Detected {lesions_count} microaneurysms: "
-                    f"Sup={q_counts.superior}, Inf={q_counts.inferior}, "
-                    f"Nas={q_counts.nasal}, Temp={q_counts.temporal}"
-                ),
-                coords=scaled_coords[:4] if scaled_coords else [
-                    {"x": 55.0, "y": 48.0, "radius": 2.0,
-                     "cropX": 55.0, "cropY": 48.0, "cropRadius": 2.0}
-                ],
-            )
-        ]
+        f = create_generic_lesion_finding(scaled_coords, "mild", f"Detected {len(scaled_coords)} low-confidence unclassified lesions")
+        if f: findings.append(f)
 
         return (triage_tier, recall_advice, progression_risk, findings)
 
@@ -80,34 +83,8 @@ def generate_findings_and_triage(
         recall_advice = "6 Months"
         progression_risk = 54
 
-        # Report detected lesions as hemorrhages (the primary CV detection)
-        findings = [
-            FindingDetail(
-                id="f-hem-1",
-                name="Hemorrhages",
-                count=max(4, lesions_count),
-                severity="moderate",
-                category="structural",
-                locationDescription=(
-                    f"Moderate multi-quadrant hemorrhages ({lesions_count} detected): "
-                    f"Sup={q_counts.superior}, Inf={q_counts.inferior}, "
-                    f"Nas={q_counts.nasal}, Temp={q_counts.temporal}"
-                ),
-                coords=scaled_coords[:8],
-            ),
-            # Hard Exudates: rule-derived finding based on grade.
-            # The pipeline's CV detection is lesion-agnostic (dark-spot morphology),
-            # so exudate detection is inferred, not directly measured.
-            FindingDetail(
-                id="f-ex-1",
-                name="Hard Exudates",
-                count=4,
-                severity="moderate",
-                category="colour",
-                locationDescription="Lipid deposits in temporal arcade",
-                coords=scaled_coords[8:12] if len(scaled_coords) > 8 else [],
-            ),
-        ]
+        f = create_generic_lesion_finding(scaled_coords, "moderate", f"Moderate multi-quadrant unclassified lesions ({len(scaled_coords)} detected)")
+        if f: findings.append(f)
 
         return (triage_tier, recall_advice, progression_risk, findings)
 
@@ -117,36 +94,12 @@ def generate_findings_and_triage(
         recall_advice = "3 Months (Urgent)"
         progression_risk = 82
 
-        rule_note = (
-            "ETDRS Rule 4 Verified (>=20 in all quadrants)"
-            if q_counts.meets_rule_4()
-            else "High-density multi-quadrant hemorrhages"
-        )
-
-        findings = [
-            FindingDetail(
-                id="f-hem-1",
-                name="Hemorrhages",
-                count=max(20, lesions_count),
-                severity="severe",
-                category="structural",
-                locationDescription=(
-                    f"{rule_note}: "
-                    f"Sup={q_counts.superior}, Inf={q_counts.inferior}, "
-                    f"Nas={q_counts.nasal}, Temp={q_counts.temporal}"
-                ),
-                coords=scaled_coords[:12],
-            ),
-            FindingDetail(
-                id="f-vasc-1",
-                name="Vascular Abnormalities",
-                count=4,
-                severity="severe",
-                category="structural",
-                locationDescription="Venous beading and prominent IRMA loops",
-                coords=scaled_coords[12:16] if len(scaled_coords) > 12 else [],
-            ),
-        ]
+        rule_note = "High-density multi-quadrant unclassified lesions"
+        if q_counts is not None and q_counts.meets_rule_4():
+            rule_note = "ETDRS Rule 4 Verified (>=20 in all quadrants) for unclassified dark lesions"
+            
+        f = create_generic_lesion_finding(scaled_coords, "severe", rule_note)
+        if f: findings.append(f)
 
         return (triage_tier, recall_advice, progression_risk, findings)
 
@@ -156,19 +109,11 @@ def generate_findings_and_triage(
     recall_advice = "3 Months (Urgent)"
     progression_risk = 96
 
-    findings = [
-        FindingDetail(
-            id="f-vasc-pdr",
-            name="Vascular Abnormalities",
-            count=max(12, lesions_count),
-            severity="severe",
-            category="structural",
-            locationDescription=(
-                f"Neovascularization elsewhere (NVE) and preretinal "
-                f"fibrovascular proliferation ({lesions_count} active foci)"
-            ),
-            coords=scaled_coords[:12],
-        ),
-    ]
+    f = create_generic_lesion_finding(
+        scaled_coords, 
+        "severe", 
+        f"Severe unclassified lesions ({len(scaled_coords)} detected) with high risk of neovascularization"
+    )
+    if f: findings.append(f)
 
     return (triage_tier, recall_advice, progression_risk, findings)

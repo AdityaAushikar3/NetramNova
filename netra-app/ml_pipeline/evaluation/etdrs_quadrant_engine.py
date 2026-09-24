@@ -1,4 +1,4 @@
-﻿"""
+"""
 evaluation/etdrs_quadrant_engine.py
 NetramNova - ETDRS 4-2-1 Spatial Quadrant Clinical Rule Engine
 
@@ -102,26 +102,64 @@ class ETDRSQuadrantEngine:
     def __init__(self, hemorrhage_threshold: int = 20):
         self.hemorrhage_threshold = hemorrhage_threshold
 
-    def compute_fovea_and_quadrants(self, img_shape: tuple[int, int]) -> tuple[int, int]:
+    def compute_fovea_and_quadrants(self, img: np.ndarray | tuple[int, int]) -> tuple[int, int] | None:
         """
-        Estimates the foveal centre from image geometry.
-        For a standard macula-centred fundus photograph, the fovea is
-        approximately at the image centre.
-        Returns (cx, cy).
+        Estimates the foveal centre from Optic Disc (OD) position.
+        Returns (cx, cy) or None if unreliable.
         """
-        h, w = img_shape[:2]
-        return (w // 2, h // 2)
+        if isinstance(img, tuple):
+            return None
+            
+        h, w = img.shape[:2]
+        
+        # 1. Detect Optic Disc (brightest large region)
+        if len(img.shape) == 3:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = img.copy()
+            
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        cl = clahe.apply(gray)
+        
+        _, thresh = cv2.threshold(cl, 220, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not contours:
+            return None
+            
+        largest_contour = max(contours, key=cv2.contourArea)
+        area = cv2.contourArea(largest_contour)
+        
+        if area < 500 or area > 50000:
+            return None
+            
+        (od_cx, od_cy), od_radius = cv2.minEnclosingCircle(largest_contour)
+        
+        # 2. Determine laterality (OD is nasal to fovea)
+        is_right_eye = od_cx < w / 2
+        
+        # 3. Estimate Fovea (approx 2.5 OD diameters temporal to OD center)
+        fovea_offset = 5 * od_radius
+        fovea_cx = od_cx + fovea_offset if is_right_eye else od_cx - fovea_offset
+        fovea_cy = od_cy
+        
+        if not (0 <= fovea_cx < w and 0 <= fovea_cy < h):
+            return None
+            
+        return (int(fovea_cx), int(fovea_cy))
 
     def assign_quadrants(
         self,
         points: list[tuple[int, int]],
-        fovea_centre: tuple[int, int],
-    ) -> QuadrantCounts:
+        fovea_centre: tuple[int, int] | None,
+    ) -> QuadrantCounts | None:
         """
         Assigns detected lesion centroids to one of 4 ETDRS quadrants
         (Superior, Inferior, Nasal, Temporal) based on their position
         relative to the estimated foveal centre.
         """
+        if fovea_centre is None:
+            return None
+            
         cx, cy = fovea_centre
         sup, inf, nas, tem = 0, 0, 0, 0
 

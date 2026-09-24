@@ -70,7 +70,7 @@ class NetramPipeline:
             print(f"[NetramNova Pipeline] Verified trained model loaded (Epoch: {ckpt.get('epoch', '?')}, Best QWK: {ckpt.get('best_qwk', '?')})", file=sys.stderr)
             print("[NetramNova Pipeline] Model and Grad-CAM successfully initialized!", file=sys.stderr)
 
-    def _extract_real_lesions_and_quadrants(self, img_512: np.ndarray, cam_map: np.ndarray | None = None) -> tuple[QuadrantCounts, list[tuple[int, int, int]]]:
+    def _extract_real_lesions_and_quadrants(self, img_512: np.ndarray, cam_map: np.ndarray | None = None) -> tuple[QuadrantCounts | None, list[tuple[int, int, int]]]:
         green = img_512[:, :, 1]
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         g_enh = clahe.apply(green)
@@ -95,7 +95,7 @@ class NetramPipeline:
                 radius = max(3, int(np.sqrt(area / np.pi)) + 2)
                 lesions.append((cx, cy, radius))
 
-        fovea_pt = self.etdrs_engine.compute_fovea_and_quadrants((512, 512))
+        fovea_pt = self.etdrs_engine.compute_fovea_and_quadrants(img_512)
         pts = [(c[0], c[1]) for c in lesions]
         q_counts = self.etdrs_engine.assign_quadrants(pts, fovea_pt)
         return q_counts, lesions

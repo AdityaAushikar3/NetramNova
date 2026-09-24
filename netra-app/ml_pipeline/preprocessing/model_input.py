@@ -21,23 +21,48 @@ def crop_fundus_circle(img: np.ndarray, tol: int = 7) -> tuple[np.ndarray, int, 
     Crops empty black background around circular retinal boundary.
     Returns: (cropped_img, x_offset, y_offset)
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     if img.ndim == 2:
-        mask = img > tol
+        mask = (img > tol).astype(np.uint8) * 255
     else:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        mask = gray > tol
+        mask = (gray > tol).astype(np.uint8) * 255
         
     if not mask.any():
         return img, 0, 0
     
-    rows = np.any(mask, axis=1)
-    cols = np.any(mask, axis=0)
+    # Try largest contour circle fit
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if contours:
+        largest_contour = max(contours, key=cv2.contourArea)
+        area = cv2.contourArea(largest_contour)
+        
+        # Only use if it's reasonably large (e.g., > 10% of image area)
+        if area > (img.shape[0] * img.shape[1] * 0.1):
+            (cx, cy), radius = cv2.minEnclosingCircle(largest_contour)
+            cx, cy, radius = int(cx), int(cy), int(radius)
+            
+            # Bound check
+            xmin = max(0, cx - radius)
+            xmax = min(img.shape[1] - 1, cx + radius)
+            ymin = max(0, cy - radius)
+            ymax = min(img.shape[0] - 1, cy + radius)
+            
+            logger.info("crop_fundus_circle: Used largest-contour circle fit.")
+            return img[ymin:ymax+1, xmin:xmax+1], xmin, ymin
+
+    # Fallback to simple rectangular bounding box of mask
+    rows = np.any(mask > 0, axis=1)
+    cols = np.any(mask > 0, axis=0)
     if not np.any(rows) or not np.any(cols):
         return img, 0, 0
         
     ymin, ymax = np.where(rows)[0][[0, -1]]
     xmin, xmax = np.where(cols)[0][[0, -1]]
     
+    logger.info("crop_fundus_circle: Used fallback rectangular bounding box.")
     return img[ymin:ymax+1, xmin:xmax+1], xmin, ymin
 
 

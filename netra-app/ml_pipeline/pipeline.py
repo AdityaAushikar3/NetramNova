@@ -88,14 +88,14 @@ class NetramPipeline:
             print(f"[NetramNova Pipeline] Verified trained model loaded (Epoch: {ckpt.get('epoch', '?')}, Best QWK: {ckpt.get('best_qwk', '?')})", file=sys.stderr)
             print("[NetramNova Pipeline] Model and Grad-CAM successfully initialized!", file=sys.stderr)
 
-    def _extract_real_lesions_and_quadrants(self, img_512: np.ndarray) -> tuple[QuadrantCounts | None, list[tuple[int, int, int, str, float]]]:
+    def _extract_real_lesions_and_quadrants(self, img_512: np.ndarray) -> tuple[QuadrantCounts | None, list[tuple[int, int, int, str, float]], tuple[int, int, float] | None]:
         """Runs the 4 PRISM-DR YOLO models on the colorful image to find real lesions."""
         lesions = self.yolo_models.predict_lesions(img_512)
 
         fovea_pt = self.etdrs_engine.compute_fovea_and_quadrants(img_512)
         pts = [(c[0], c[1]) for c in lesions]
         q_counts = self.etdrs_engine.assign_quadrants(pts, fovea_pt)
-        return q_counts, lesions
+        return q_counts, lesions, fovea_pt
 
     @staticmethod
     def _load_bgr_exif_corrected(image_bytes: bytes | None = None, image_path: str | None = None) -> np.ndarray | None:
@@ -183,7 +183,17 @@ class NetramPipeline:
         score.backward(retain_graph=True)
         cam_heatmap = self.gradcam.compute_map_from_hooks()
         
-        q_counts, detected_lesions = self._extract_real_lesions_and_quadrants(prep_img.pre_ben_graham_512)
+        q_counts, detected_lesions, fovea_pt = self._extract_real_lesions_and_quadrants(prep_img.pre_ben_graham_512)
+        
+        # Calculate CSME Distance (Hard Exudates to Fovea in Disc Diameters)
+        csme_distance = 99.0
+        if fovea_pt is not None and len(fovea_pt) == 3:
+            fx, fy, od_radius = fovea_pt
+            hard_exudates = [l for l in detected_lesions if l[3] == "Hard Exudates"]
+            if hard_exudates and od_radius > 0:
+                disc_diameter = od_radius * 2.0
+                distances = [np.sqrt((ex[0] - fx)**2 + (ex[1] - fy)**2) / disc_diameter for ex in hard_exudates]
+                csme_distance = float(min(distances))
 
         audited_grade = raw_pred
         rescue_note = None
@@ -236,5 +246,6 @@ class NetramPipeline:
             "overlay_bgr": overlay_bgr,
             "h_orig": h_orig,
             "w_orig": w_orig,
-            "img_bgr": img_bgr
+            "img_bgr": img_bgr,
+            "csme_distance": csme_distance
         }

@@ -25,6 +25,7 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
   onSendToDoctor,
 }) => {
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
+  const [hiddenFindingNames, setHiddenFindingNames] = useState<Set<string>>(new Set());
   const [rightViewMode, setRightViewMode] = useState<'overlay' | 'gradcam' | 'preprocessed'>('overlay');
   const [showGrid, setShowGrid] = useState<boolean>(false);
   
@@ -50,12 +51,17 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
   };
 
   const findingsSum = result.findings.reduce((acc, f) => acc + f.count, 0);
+  const visibleFindings = result.findings.filter(f => !hiddenFindingNames.has(f.name));
+
+  const handlePrintReport = () => {
+    window.print();
+  };
 
   return (
     <div className="w-full font-sans select-none flex flex-col gap-6">
       
       {/* 1. Header & Patient Context */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 print:hidden">
         <button 
           onClick={onRecapture}
           className="text-blue-600 hover:text-blue-700 font-semibold text-sm flex items-center gap-1 w-fit transition-colors"
@@ -74,9 +80,9 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
             </p>
           </div>
           
-          <button className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm">
+          <button onClick={handlePrintReport} className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm">
             <Printer className="w-4 h-4" />
-            Generate Report
+            Generate PDF Report
           </button>
         </div>
       </div>
@@ -86,7 +92,7 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
         
         {/* Left Col: Dual Image Viewer */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-4">
+          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-4 print:hidden">
             <div className="flex items-center gap-6">
               <span className="text-slate-500 font-semibold text-sm">Views:</span>
               <button 
@@ -149,7 +155,7 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
                 {rightViewMode === 'overlay' && (
                   <FundusCanvas
                     imageUrl={result.preprocessedImage || caseData.imageUrl || ''}
-                    findings={result.findings}
+                    findings={visibleFindings}
                     selectedFindingId={selectedFindingId}
                     showOverlays={true}
                     showFindingLabels={true}
@@ -169,7 +175,7 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
           </div>
           
           {/* Quality Summary Footer */}
-          <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+          <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between print:hidden">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 text-sm">
                 <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -201,9 +207,14 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-slate-500 text-sm font-medium">DME Risk</span>
+                <div className="flex flex-col">
+                  <span className="text-slate-500 text-sm font-medium">DME Risk</span>
+                  {result.csmeFoveaDistanceDiscDiameters > 0 && result.csmeFoveaDistanceDiscDiameters < 99 && (
+                    <span className="text-xs text-slate-400 mt-0.5">Nearest Exudate: {result.csmeFoveaDistanceDiscDiameters.toFixed(2)} DD</span>
+                  )}
+                </div>
                 <span className={`px-3 py-1 border rounded-md text-sm font-bold shadow-sm ${result.csmeThreatDetected ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                  {result.csmeThreatDetected ? 'HIGH' : 'LOW'}
+                  {result.csmeThreatDetected ? 'HIGH (CSME)' : 'LOW'}
                 </span>
               </div>
 
@@ -240,19 +251,30 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
                 if (f.name === 'Hard Exudates') dotColor = 'bg-yellow-400';
 
                 const isSelected = selectedFindingId === f.id;
+                const isHidden = hiddenFindingNames.has(f.name);
 
                 return (
                   <div 
                     key={f.id}
                     onMouseEnter={() => setSelectedFindingId(f.id)}
                     onMouseLeave={() => setSelectedFindingId(null)}
-                    className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-default ${isSelected ? 'bg-blue-50' : 'hover:bg-slate-50'}`}
+                    onClick={() => {
+                      setHiddenFindingNames(prev => {
+                        const next = new Set(prev);
+                        if (next.has(f.name)) next.delete(f.name);
+                        else next.add(f.name);
+                        return next;
+                      });
+                    }}
+                    className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${isSelected ? 'bg-blue-50' : 'hover:bg-slate-50'} ${isHidden ? 'opacity-50 grayscale' : ''}`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-2.5 h-2.5 rounded-full ${dotColor} shadow-sm`} />
                       <span className={`text-sm font-medium ${isSelected ? 'text-blue-900' : 'text-slate-700'}`}>{f.name}</span>
                     </div>
-                    <span className={`text-sm font-bold ${isSelected ? 'text-blue-700' : 'text-slate-900'}`}>{f.count}</span>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-sm font-bold ${isSelected ? 'text-blue-700' : 'text-slate-900'}`}>{f.count}</span>
+                    </div>
                   </div>
                 );
               })}

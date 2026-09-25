@@ -145,12 +145,12 @@ class ETDRSQuadrantEngine:
         if not (0 <= fovea_cx < w and 0 <= fovea_cy < h):
             return None
             
-        return (int(fovea_cx), int(fovea_cy))
+        return (int(fovea_cx), int(fovea_cy), float(od_radius))
 
     def assign_quadrants(
         self,
         points: list[tuple[int, int]],
-        fovea_centre: tuple[int, int] | None,
+        fovea_centre: tuple[int, int, float] | tuple[int, int] | None,
     ) -> QuadrantCounts | None:
         """
         Assigns detected lesion centroids to one of 4 ETDRS quadrants
@@ -160,7 +160,10 @@ class ETDRSQuadrantEngine:
         if fovea_centre is None:
             return None
             
-        cx, cy = fovea_centre
+        if len(fovea_centre) == 3:
+            cx, cy, _ = fovea_centre
+        else:
+            cx, cy = fovea_centre
         sup, inf, nas, tem = 0, 0, 0, 0
 
         for px, py in points:

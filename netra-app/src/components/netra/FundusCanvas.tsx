@@ -108,9 +108,9 @@ export const FundusCanvas: React.FC<FundusCanvasProps> = ({
       const centerY = dY + dH / 2;
       const maxRadius = Math.min(dW, dH) / 2.2;
       
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.setLineDash([5, 5]);
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'; // Brighter white for visibility
+      ctx.setLineDash([4, 4]); // Slightly tighter dash
+      ctx.lineWidth = 2; // Thicker line
 
       // Concentric circles (Fovea, Inner Macula, Outer Macula approximation)
       ctx.beginPath();

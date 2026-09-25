@@ -107,7 +107,11 @@ def serialize_result(raw_result: dict) -> dict:
         
     final_grade = raw_result["final_grade"]
     probs = raw_result["probs"]
-    csme_detected = bool(final_grade >= 2 and probs[2] > 0.25)
+    csme_dist = raw_result.get("csme_distance", 99.0)
+    
+    # CSME is triggered if Hard Exudates are within 1.0 Disc Diameter of the Fovea
+    csme_detected = bool(csme_dist <= 1.0)
+    
     rag_report = get_deterministic_clinical_guidance(stage=final_grade, has_macular_edema=csme_detected)
 
     from ml_pipeline.models.dto import ScreeningResult, QualityMetricsDTO, ClinicalGuidanceDTO
@@ -150,9 +154,7 @@ def serialize_result(raw_result: dict) -> dict:
         recallAdvice=recall_advice,
         progressionRisk=progression_risk,
         csmeThreatDetected=csme_detected,
-        # CSME fovea distance: not directly measured by this pipeline.
-        # Set to 0.0 rather than fabricating a numeric value.
-        csmeFoveaDistanceDiscDiameters=0.0,  # No fovea-to-exudate distance detector available
+        csmeFoveaDistanceDiscDiameters=round(csme_dist, 2) if csme_dist < 99.0 else 0.0,
         findings=findings,
         clinicalGuidance=guidance,
         qualityStatus="passed" if gradable else "warning",

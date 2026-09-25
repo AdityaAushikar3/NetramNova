@@ -122,7 +122,9 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
         formData.append('file', blob, 'sample_fundus.jpg');
       }
 
-      const apiRes = await fetch('/api/classify', {
+      // Direct call to Render to bypass Vercel's 10-second serverless timeout limit
+      const ML_URL = process.env.NEXT_PUBLIC_ML_SERVICE_URL || 'http://127.0.0.1:5000';
+      const apiRes = await fetch(`${ML_URL}/predict`, {
         method: 'POST',
         body: formData,
       });

@@ -62,47 +62,57 @@ def build_yolo_seg(weights: str = "yolov8m-seg.pt",
     return YOLOv8SegWrapper(weights)
 
 
-class YOLOv8SegWrapper(nn.Module):
+import os
+from pathlib import Path
+
+class PrismDRYoloWrapper:
     """
-    Thin wrapper around ultralytics YOLOv8 for inference.
-    Training is done via ultralytics CLI (see training/train_segmenter.py).
+    Wrapper around the 4 specialized PRISM-DR YOLO object detection models.
+    Loads models for MA, HE, EX, and SE from the checkpoints directory.
     """
+    def __init__(self, checkpoints_dir: str):
+        from ultralytics import YOLO
+        import sys
+        self.models = {}
+        lesions = {
+            "Microaneurysm": "prism_ma.pt", 
+            "Haemorrhage": "prism_he.pt", 
+            "Hard Exudate": "prism_ex.pt", 
+            "Soft Exudate": "prism_se.pt"
+        }
+        for lesion_name, filename in lesions.items():
+            path = os.path.join(checkpoints_dir, filename)
+            if os.path.exists(path):
+                print(f"[NetramNova Pipeline] Loading PRISM-DR {lesion_name} model...", file=sys.stderr)
+                # Load quietly, but fuse for faster inference
+                m = YOLO(path)
+                m.fuse()
+                self.models[lesion_name] = m
+            else:
+                print(f"[NetramNova Pipeline] Warning: PRISM-DR YOLO weights not found: {path}", file=sys.stderr)
 
-    def __init__(self, weights: str = "yolov8m-seg.pt"):
-        super().__init__()
-        try:
-            from ultralytics import YOLO
-            self._model = YOLO(weights)
-            self._model.fuse()
-        except ImportError:
-            raise ImportError("Install ultralytics: pip install ultralytics")
-
-    def forward(self, x: torch.Tensor):
+    def predict_lesions(self, image_bgr) -> list[tuple[int, int, int, str, float]]:
         """
-        Run inference on a batch of images.
-        x: (B, 3, H, W) float32 [0,1] or uint8 numpy arrays
-        Returns ultralytics Results object.
+        Run prediction on a single BGR image.
+        Returns: list of (cx, cy, radius, lesion_name, confidence)
         """
-        return self._model(x)
-
-    def predict_masks(self, image_bgr) -> dict:
-        """
-        Run prediction on a single BGR image, return per-class binary masks.
-
-        Returns
-        -------
-        dict: {class_name: binary_mask (H, W, uint8)}
-        """
-        results = self._model(image_bgr, verbose=False)
-        masks_out = {cls: None for cls in LESION_CLASSES}
-        if results[0].masks is None:
-            return masks_out
-        for i, cls_id in enumerate(results[0].boxes.cls.cpu().int().tolist()):
-            mask = results[0].masks.data[i].cpu().numpy()
-            cls_name = LESION_CLASSES[cls_id] if cls_id < len(LESION_CLASSES) else None
-            if cls_name:
-                masks_out[cls_name] = (mask > 0.5).astype("uint8") * 255
-        return masks_out
+        results_out = []
+        for lesion_name, model in self.models.items():
+            res = model(image_bgr, verbose=False)[0]
+            boxes = res.boxes
+            if boxes is None or len(boxes) == 0:
+                continue
+            for box in boxes:
+                x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                conf = box.conf[0].cpu().item()
+                # If confidence is too low, we can skip it, but PRISM-DR handles thresholding internally
+                if conf < 0.25:
+                    continue
+                cx = int((x1 + x2) / 2)
+                cy = int((y1 + y2) / 2)
+                radius = max(3, int(max(x2 - x1, y2 - y1) / 2))
+                results_out.append((cx, cy, radius, lesion_name, conf))
+        return results_out
 
 
 # ══════════════════════════════════════════════════════════════════════════════

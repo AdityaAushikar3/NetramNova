@@ -41,11 +41,12 @@ def serialize_result(raw_result: dict) -> dict:
     
     scaled_coords = [
         {
-            "x": round(float((cx * w_crop / 512) + x_offset) / w_orig * 100.0, 2),
-            "y": round(float((cy * h_crop / 512) + y_offset) / h_orig * 100.0, 2),
-            "radius": round(float(max(5, int(r * w_crop / 512))) / w_orig * 100.0, 2)
+            "x": round(float((l[0] * w_crop / 512) + x_offset) / w_orig * 100.0, 2),
+            "y": round(float((l[1] * h_crop / 512) + y_offset) / h_orig * 100.0, 2),
+            "radius": round(float(max(5, int(l[2] * w_crop / 512))) / w_orig * 100.0, 2),
+            "type": l[3] if len(l) > 3 else "Lesion"
         }
-        for cx, cy, r in raw_result["detected_lesions"][:16]
+        for l in raw_result["detected_lesions"][:16]
     ]
 
     # 2. Findings and Triage

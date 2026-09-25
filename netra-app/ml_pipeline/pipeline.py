@@ -22,7 +22,7 @@ from ml_pipeline.preprocessing.model_input import prepare_model_input
 from ml_pipeline.evaluation.gradcam import GradCAM, visualize_gradcam
 from ml_pipeline.evaluation.etdrs_quadrant_engine import ETDRSQuadrantEngine, QuadrantCounts
 from ml_pipeline.evaluation.ma_patch_engine import MAPatchRescueEngine, MicroaneurysmAuditResult
-
+from ml_pipeline.models.segmentation_model import PrismDRYoloWrapper
 class NetramPipeline:
     def __init__(self, ckpt_path: str = "ml_pipeline/outputs/checkpoints/best_classifier.pt"):
         self.ckpt_path = ckpt_path
@@ -67,33 +67,16 @@ class NetramPipeline:
 
             self.transform = get_val_transforms(512)
             self.gradcam = GradCAM(self.model, target_layer=self.model.conv_head)
+            
+            ckpt_dir = os.path.dirname(ckpt_path)
+            self.yolo_models = PrismDRYoloWrapper(checkpoints_dir=ckpt_dir)
+            
             print(f"[NetramNova Pipeline] Verified trained model loaded (Epoch: {ckpt.get('epoch', '?')}, Best QWK: {ckpt.get('best_qwk', '?')})", file=sys.stderr)
             print("[NetramNova Pipeline] Model and Grad-CAM successfully initialized!", file=sys.stderr)
 
-    def _extract_real_lesions_and_quadrants(self, img_512: np.ndarray, cam_map: np.ndarray | None = None) -> tuple[QuadrantCounts | None, list[tuple[int, int, int]]]:
-        green = img_512[:, :, 1]
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        g_enh = clahe.apply(green)
-        bh = cv2.morphologyEx(g_enh, cv2.MORPH_BLACKHAT, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11)))
-
-        gray = cv2.cvtColor(img_512, cv2.COLOR_BGR2GRAY)
-        fov_mask = cv2.erode((gray > 20).astype(np.uint8) * 255, np.ones((15, 15), np.uint8))
-        _, mask = cv2.threshold(bh, 24, 255, cv2.THRESH_BINARY)
-        mask = cv2.bitwise_and(mask, fov_mask)
-
-        if cam_map is not None:
-            cam_resized = cv2.resize(cam_map, (512, 512))
-            cam_gate = (cam_resized > 0.20).astype(np.uint8) * 255
-            mask = cv2.bitwise_and(mask, cv2.dilate(cam_gate, np.ones((9, 9), np.uint8)))
-
-        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask)
-        lesions = []
-        for i in range(1, num_labels):
-            area = stats[i, cv2.CC_STAT_AREA]
-            if 4 <= area <= 400:
-                cx, cy = int(centroids[i, 0]), int(centroids[i, 1])
-                radius = max(3, int(np.sqrt(area / np.pi)) + 2)
-                lesions.append((cx, cy, radius))
+    def _extract_real_lesions_and_quadrants(self, img_512: np.ndarray) -> tuple[QuadrantCounts | None, list[tuple[int, int, int, str, float]]]:
+        """Runs the 4 PRISM-DR YOLO models on the colorful image to find real lesions."""
+        lesions = self.yolo_models.predict_lesions(img_512)
 
         fovea_pt = self.etdrs_engine.compute_fovea_and_quadrants(img_512)
         pts = [(c[0], c[1]) for c in lesions]
@@ -186,7 +169,7 @@ class NetramPipeline:
         score.backward(retain_graph=True)
         cam_heatmap = self.gradcam.compute_map_from_hooks()
         
-        q_counts, detected_lesions = self._extract_real_lesions_and_quadrants(prep_img.pre_ben_graham_512, cam_heatmap)
+        q_counts, detected_lesions = self._extract_real_lesions_and_quadrants(prep_img.pre_ben_graham_512)
 
         audited_grade = raw_pred
         rescue_note = None

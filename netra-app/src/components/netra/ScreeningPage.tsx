@@ -103,6 +103,11 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
   };
 
   const handleStartAnalysis = async () => {
+    if (!selectedPatient) {
+      setAnalysisError('Please select or create a patient first.');
+      return;
+    }
+    
     if (!selectedFile && !customImageUrl) {
       setAnalysisError('Please upload a fundus image before running analysis.');
       return;

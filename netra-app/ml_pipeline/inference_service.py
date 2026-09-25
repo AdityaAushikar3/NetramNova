@@ -176,93 +176,93 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
         return err
     return serialize_result(raw_result)
 
-def start_server(port: int = 5000):
-    from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify
 
-    app = Flask("NetramNovaInferenceService")
+app = Flask("NetramNovaInferenceService")
 
-    @app.after_request
-    def add_cors(response):
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-        return response
+@app.after_request
+def add_cors(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
 
-    @app.route("/health", methods=["GET"])
-    def health():
-        return jsonify({
-            "status": "healthy",
-            "model_loaded": PIPELINE.model is not None,
-            "device": str(PIPELINE.device),
-            "pipeline": "NetramNova EfficientNet-B2 + ETDRS + Patch MA"
-        })
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "healthy",
+        "model_loaded": PIPELINE.model is not None,
+        "device": str(PIPELINE.device),
+        "pipeline": "NetramNova EfficientNet-B2 + ETDRS + Patch MA"
+    })
 
-    @app.route("/predict", methods=["POST", "OPTIONS"])
-    def predict():
-        if request.method == "OPTIONS":
-            return jsonify({"status": "ok"})
+@app.route("/predict", methods=["POST", "OPTIONS"])
+def predict():
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"})
 
-        try:
-            # Determine image source
-            img_bytes = None
-            image_path = None
+    try:
+        # Determine image source
+        img_bytes = None
+        image_path = None
 
-            if "file" in request.files:
-                file_storage = request.files["file"]
-                img_bytes = file_storage.read()
-                if not img_bytes or len(img_bytes) == 0:
-                    return jsonify({
-                        "ok": False,
-                        "stage": "validation",
-                        "code": "EMPTY_FILE",
-                        "message": "Uploaded file is empty"
-                    }), 400
-            else:
-                data = request.get_json(silent=True) or {}
-                if "image_path" in data:
-                    image_path = data["image_path"]
-                elif "image_base64" in data:
-                    raw_b64 = data["image_base64"]
-                    if "," in raw_b64:
-                        raw_b64 = raw_b64.split(",")[1]
-                    img_bytes = base64.b64decode(raw_b64)
-                else:
-                    return jsonify({
-                        "ok": False,
-                        "stage": "validation",
-                        "code": "NO_IMAGE",
-                        "message": "No valid image provided"
-                    }), 400
-
-            # Run inference
-            result = run_pipeline_on_image(image_bytes=img_bytes, image_path=image_path)
-
-            # Check for quality gate rejection (returned as error dict)
-            if result.get("error"):
+        if "file" in request.files:
+            file_storage = request.files["file"]
+            img_bytes = file_storage.read()
+            if not img_bytes or len(img_bytes) == 0:
                 return jsonify({
                     "ok": False,
-                    "stage": "quality_gate",
-                    "code": "IMAGE_QUALITY_REJECTED",
-                    "message": result["error"]
-                }), 422
+                    "stage": "validation",
+                    "code": "EMPTY_FILE",
+                    "message": "Uploaded file is empty"
+                }), 400
+        else:
+            data = request.get_json(silent=True) or {}
+            if "image_path" in data:
+                image_path = data["image_path"]
+            elif "image_base64" in data:
+                raw_b64 = data["image_base64"]
+                if "," in raw_b64:
+                    raw_b64 = raw_b64.split(",")[1]
+                img_bytes = base64.b64decode(raw_b64)
+            else:
+                return jsonify({
+                    "ok": False,
+                    "stage": "validation",
+                    "code": "NO_IMAGE",
+                    "message": "No valid image provided"
+                }), 400
 
-            return jsonify(result), 200
+        # Run inference
+        result = run_pipeline_on_image(image_bytes=img_bytes, image_path=image_path)
 
-        except Exception as exc:
-            app.logger.exception("Inference failed")
+        # Check for quality gate rejection (returned as error dict)
+        if result.get("error"):
             return jsonify({
                 "ok": False,
-                "stage": "ml_inference",
-                "code": type(exc).__name__,
-                "message": str(exc)
-            }), 500
+                "stage": "quality_gate",
+                "code": "IMAGE_QUALITY_REJECTED",
+                "message": result["error"]
+            }), 422
 
+        return jsonify(result), 200
+
+    except Exception as exc:
+        app.logger.exception("Inference failed")
+        return jsonify({
+            "ok": False,
+            "stage": "ml_inference",
+            "code": type(exc).__name__,
+            "message": str(exc)
+        }), 500
+
+def start_server(port: int = 5000):
     print("=" * 55)
     print(f" NetramNova AI Inference Server Running on Port {port}")
     print(f" Pre-warmed Checkpoint: best_classifier.pt on {PIPELINE.device}")
     print(f" Ready to receive screening scans from Next.js!")
     print("=" * 55)
-    app.run(host="127.0.0.1", port=port, threaded=False)
+    app.run(host="0.0.0.0", port=port, threaded=False)
 
 
 if __name__ == "__main__":

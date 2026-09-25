@@ -75,10 +75,10 @@ class PrismDRYoloWrapper:
         import sys
         self.models = {}
         lesions = {
-            "Microaneurysm": "prism_ma.onnx", 
-            "Haemorrhage": "prism_he.onnx", 
-            "Hard Exudate": "prism_ex.onnx", 
-            "Soft Exudate": "prism_se.onnx"
+            "Microaneurysms": "prism_ma.onnx", 
+            "Hemorrhages": "prism_he.onnx", 
+            "Hard Exudates": "prism_ex.onnx", 
+            "Soft Exudates": "prism_se.onnx"
         }
         for lesion_name, filename in lesions.items():
             path = os.path.join(checkpoints_dir, filename)

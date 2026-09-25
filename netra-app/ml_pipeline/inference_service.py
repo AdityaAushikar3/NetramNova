@@ -178,15 +178,10 @@ def run_pipeline_on_image(image_bytes: bytes | None = None,
     return serialize_result(raw_result)
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask("NetramNovaInferenceService")
-
-@app.after_request
-def add_cors(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    return response
+CORS(app)
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -199,8 +194,6 @@ def health():
 
 @app.route("/predict", methods=["POST", "OPTIONS"])
 def predict():
-    if request.method == "OPTIONS":
-        return jsonify({"status": "ok"})
 
     try:
         # Determine image source

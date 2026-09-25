@@ -189,7 +189,7 @@ class NetramPipeline:
         rescue_note = None
 
         ma_lesions = [l for l in detected_lesions if l[3] == "Microaneurysms"]
-        if raw_pred == 2 and q_counts is not None and q_counts.meets_rule_4():
+        if raw_pred in [2, 3] and q_counts is not None:
             audited_grade, rescue_note = self.etdrs_engine.audit_classification(raw_pred, probs, q_counts)
         elif raw_pred == 0 and len(ma_lesions) > 0 and probs[1] > 0.15:
             ma_result = MicroaneurysmAuditResult(

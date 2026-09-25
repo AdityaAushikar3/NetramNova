@@ -65,55 +65,43 @@ def generate_findings_and_triage(
         return ("Tier 1 (Auto-Cleared)", "12 Months", 5, [])
 
     findings = []
+    
+    # Group lesions by their specific name (Microaneurysms, Hemorrhages, etc.)
+    from collections import defaultdict
+    grouped = defaultdict(list)
+    for c in scaled_coords:
+        name = c.get("name", "Lesion")
+        grouped[name].append(c)
+        
+    severity = "mild"
+    if final_grade == 2: severity = "moderate"
+    elif final_grade >= 3: severity = "severe"
+
+    for name, coords in grouped.items():
+        if coords:
+            findings.append(FindingDetail(
+                id=f"f-{name.lower().replace(' ', '-')}-{severity}",
+                name=name,
+                count=len(coords),
+                severity=severity,
+                category="structural",
+                locationDescription=f"Detected {len(coords)} {name}",
+                coords=coords
+            ))
 
     # ── Grade 1: Mild NPDR ───────────────────────────────────────────────
     if final_grade == 1:
-        triage_tier = "Tier 1 (Auto-Cleared)"
-        recall_advice = "12 Months"
-        progression_risk = 22
-
-        f = create_generic_lesion_finding(scaled_coords, "mild", f"Detected {len(scaled_coords)} low-confidence unclassified lesions")
-        if f: findings.append(f)
-
-        return (triage_tier, recall_advice, progression_risk, findings)
+        return ("Tier 1 (Auto-Cleared)", "12 Months", 22, findings)
 
     # ── Grade 2: Moderate NPDR ───────────────────────────────────────────
     if final_grade == 2:
-        triage_tier = "Tier 2 (Priority Review)"
-        recall_advice = "6 Months"
-        progression_risk = 54
-
-        f = create_generic_lesion_finding(scaled_coords, "moderate", f"Moderate multi-quadrant unclassified lesions ({len(scaled_coords)} detected)")
-        if f: findings.append(f)
-
-        return (triage_tier, recall_advice, progression_risk, findings)
+        return ("Tier 2 (Priority Review)", "6 Months", 54, findings)
 
     # ── Grade 3: Severe NPDR ─────────────────────────────────────────────
     if final_grade == 3:
-        triage_tier = "Tier 3 (Specialist Escalation)"
-        recall_advice = "3 Months (Urgent)"
-        progression_risk = 82
-
-        rule_note = "High-density multi-quadrant unclassified lesions"
-        if q_counts is not None and q_counts.meets_rule_4():
-            rule_note = "ETDRS Rule 4 Verified (>=20 in all quadrants) for unclassified dark lesions"
-            
-        f = create_generic_lesion_finding(scaled_coords, "severe", rule_note)
-        if f: findings.append(f)
-
-        return (triage_tier, recall_advice, progression_risk, findings)
+        return ("Tier 3 (Specialist Escalation)", "3 Months (Urgent)", 82, findings)
 
     # ── Grade 4: Proliferative DR ────────────────────────────────────────
-    # (final_grade >= 4)
-    triage_tier = "Tier 3 (Specialist Escalation)"
-    recall_advice = "3 Months (Urgent)"
-    progression_risk = 96
-
-    f = create_generic_lesion_finding(
-        scaled_coords, 
-        "severe", 
-        f"Severe unclassified lesions ({len(scaled_coords)} detected) with high risk of neovascularization"
-    )
-    if f: findings.append(f)
+    return ("Tier 3 (Specialist Escalation)", "3 Months (Urgent)", 96, findings)
 
     return (triage_tier, recall_advice, progression_risk, findings)

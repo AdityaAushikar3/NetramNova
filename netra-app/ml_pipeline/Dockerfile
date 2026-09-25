@@ -12,7 +12,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Force remove the GUI version of OpenCV that ultralytics sneakily installs
-RUN pip uninstall -y opencv-python && pip install --no-cache-dir opencv-python-headless
+RUN pip uninstall -y opencv-python || true
+RUN pip install --no-cache-dir --force-reinstall opencv-python-headless
 
 # Add production server and CORS
 RUN pip install --no-cache-dir gunicorn flask-cors

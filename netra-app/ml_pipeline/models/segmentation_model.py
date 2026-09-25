@@ -68,50 +68,62 @@ from pathlib import Path
 class PrismDRYoloWrapper:
     """
     Wrapper around the 4 specialized PRISM-DR YOLO object detection models.
-    Loads models for MA, HE, EX, and SE from the checkpoints directory.
+    Loads models for MA, HE, EX, and SE using Lazy-Loading to save RAM (keeps usage < 512MB).
     """
     def __init__(self, checkpoints_dir: str):
-        from ultralytics import YOLO
-        import sys
-        self.models = {}
-        lesions = {
+        self.checkpoints_dir = checkpoints_dir
+        self.lesions = {
             "Microaneurysm": "prism_ma.pt", 
             "Haemorrhage": "prism_he.pt", 
             "Hard Exudate": "prism_ex.pt", 
             "Soft Exudate": "prism_se.pt"
         }
-        for lesion_name, filename in lesions.items():
-            path = os.path.join(checkpoints_dir, filename)
-            if os.path.exists(path):
-                print(f"[NetramNova Pipeline] Loading PRISM-DR {lesion_name} model...", file=sys.stderr)
-                # Load quietly, but fuse for faster inference
-                m = YOLO(path)
-                m.fuse()
-                self.models[lesion_name] = m
-            else:
-                print(f"[NetramNova Pipeline] Warning: PRISM-DR YOLO weights not found: {path}", file=sys.stderr)
 
     def predict_lesions(self, image_bgr) -> list[tuple[int, int, int, str, float]]:
         """
-        Run prediction on a single BGR image.
+        Run prediction on a single BGR image by loading one model at a time.
         Returns: list of (cx, cy, radius, lesion_name, confidence)
         """
+        from ultralytics import YOLO
+        import sys
+        import gc
+        import torch
+
         results_out = []
-        for lesion_name, model in self.models.items():
+        
+        for lesion_name, filename in self.lesions.items():
+            path = os.path.join(self.checkpoints_dir, filename)
+            if not os.path.exists(path):
+                continue
+                
+            print(f"[NetramNova Pipeline] Lazy-Loading {lesion_name} model...", file=sys.stderr)
+            
+            # Load the model into RAM
+            model = YOLO(path)
+            
+            # Run inference
             res = model(image_bgr, verbose=False)[0]
             boxes = res.boxes
-            if boxes is None or len(boxes) == 0:
-                continue
-            for box in boxes:
-                x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
-                conf = box.conf[0].cpu().item()
-                # If confidence is too low, we can skip it, but PRISM-DR handles thresholding internally
-                if conf < 0.25:
-                    continue
-                cx = int((x1 + x2) / 2)
-                cy = int((y1 + y2) / 2)
-                radius = max(3, int(max(x2 - x1, y2 - y1) / 2))
-                results_out.append((cx, cy, radius, lesion_name, conf))
+            
+            if boxes is not None and len(boxes) > 0:
+                for box in boxes:
+                    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                    conf = box.conf[0].cpu().item()
+                    
+                    if conf < 0.25:
+                        continue
+                        
+                    cx = int((x1 + x2) / 2)
+                    cy = int((y1 + y2) / 2)
+                    radius = max(3, int(max(x2 - x1, y2 - y1) / 2))
+                    results_out.append((cx, cy, radius, lesion_name, conf))
+                    
+            # Delete model from RAM immediately to stay under 512MB limit
+            del model
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
         return results_out
 
 

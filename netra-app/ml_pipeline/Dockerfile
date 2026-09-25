@@ -2,6 +2,9 @@ FROM python:3.10
 
 WORKDIR /app
 
+# Install system graphics library for OpenCV
+RUN apt-get update && apt-get install -y libgl1 && rm -rf /var/lib/apt/lists/*
+
 # System dependencies removed, using opencv-python-headless
 
 # Install dependencies

@@ -65,6 +65,20 @@ class NetramPipeline:
             self.model = self.model.to(self.device)
             self.model.eval()
 
+            # Freeze all parameters to prevent massive RAM spikes during Grad-CAM backward()
+            for param in self.model.parameters():
+                param.requires_grad_(False)
+            
+            # Unfreeze only the head layers needed for Grad-CAM
+            for param in self.model.conv_head.parameters():
+                param.requires_grad_(True)
+            if hasattr(self.model, 'bn2'):
+                for param in self.model.bn2.parameters():
+                    param.requires_grad_(True)
+            if hasattr(self.model, 'classifier'):
+                for param in self.model.classifier.parameters():
+                    param.requires_grad_(True)
+
             self.transform = get_val_transforms(512)
             self.gradcam = GradCAM(self.model, target_layer=self.model.conv_head)
             

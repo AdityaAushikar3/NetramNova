@@ -209,7 +209,7 @@ export const RetinalAnalysisPanel: React.FC<RetinalAnalysisPanelProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                   <span className="text-slate-500 text-sm font-medium">DME Risk</span>
-                  {result.csmeFoveaDistanceDiscDiameters > 0 && result.csmeFoveaDistanceDiscDiameters < 99 && (
+                  {result.csmeFoveaDistanceDiscDiameters !== undefined && result.csmeFoveaDistanceDiscDiameters > 0 && result.csmeFoveaDistanceDiscDiameters < 99 && (
                     <span className="text-xs text-slate-400 mt-0.5">Nearest Exudate: {result.csmeFoveaDistanceDiscDiameters.toFixed(2)} DD</span>
                   )}
                 </div>

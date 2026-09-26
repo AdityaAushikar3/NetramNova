@@ -93,7 +93,9 @@ class NetramPipeline:
         lesions = self.yolo_models.predict_lesions(img_512)
 
         fovea_pt = self.etdrs_engine.compute_fovea_and_quadrants(img_512)
-        pts = [(c[0], c[1]) for c in lesions]
+        # Only count Hemorrhages and Microaneurysms for ETDRS Rule 4 Quadrant checks
+        hma_lesions = [l for l in lesions if l[3] in ["Hemorrhages", "Microaneurysms"]]
+        pts = [(c[0], c[1]) for c in hma_lesions]
         q_counts = self.etdrs_engine.assign_quadrants(pts, fovea_pt)
         return q_counts, lesions, fovea_pt
 

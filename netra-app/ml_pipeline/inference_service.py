@@ -195,7 +195,7 @@ def health():
         "pipeline": "NetramNova EfficientNet-B2 + ETDRS + Patch MA"
     })
 
-@app.route("/predict", methods=["POST", "OPTIONS"])
+@app.route("/predict", methods=["POST"])
 def predict():
 
     try:

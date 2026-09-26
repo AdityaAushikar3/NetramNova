@@ -93,9 +93,7 @@ class NetramPipeline:
         lesions = self.yolo_models.predict_lesions(img_512)
 
         fovea_pt = self.etdrs_engine.compute_fovea_and_quadrants(img_512)
-        # Only count Hemorrhages and Microaneurysms for ETDRS Rule 4 Quadrant checks
-        hma_lesions = [l for l in lesions if l[3] in ["Hemorrhages", "Microaneurysms"]]
-        pts = [(c[0], c[1]) for c in hma_lesions]
+        pts = [(c[0], c[1]) for c in lesions]
         q_counts = self.etdrs_engine.assign_quadrants(pts, fovea_pt)
         return q_counts, lesions, fovea_pt
 
@@ -201,7 +199,7 @@ class NetramPipeline:
         elif raw_pred == 0 and len(ma_lesions) > 0 and probs[1] > 0.15:
             ma_result = MicroaneurysmAuditResult(
                 ma_count=len(ma_lesions),
-                mean_confidence=float(probs[1] + 0.5),
+                mean_confidence=float(sum([l[4] for l in ma_lesions]) / len(ma_lesions)),
                 max_lesion_diameter_px=float(max([l[2] for l in ma_lesions]) if ma_lesions else 5.0),
                 has_isolated_ma_only=True
             )

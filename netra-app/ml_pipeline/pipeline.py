@@ -168,20 +168,15 @@ class NetramPipeline:
         tensor = augmented["image"].unsqueeze(0).to(self.device)
 
         self.model.eval()
-        self.model.zero_grad()
 
-        logits = self.model(tensor)
-        probs = torch.softmax(logits, dim=1).detach().cpu().numpy()[0]
-        raw_pred = int(probs.argmax())
+        # 1. Fast Clinical Prediction (No Gradients)
+        with torch.no_grad():
+            logits_fast = self.model(tensor)
+            probs = torch.softmax(logits_fast, dim=1).detach().cpu().numpy()[0]
+            raw_pred = int(probs.argmax())
 
-        p_ref = float(probs[2:].sum())
-        calibrated_referable = bool(p_ref >= 0.40)
-
-        # Trigger backward pass to capture Grad-CAM gradients from the main forward pass
-        self.model.zero_grad()
-        score = logits[0, raw_pred]
-        score.backward(retain_graph=True)
-        cam_heatmap = self.gradcam.compute_map_from_hooks()
+            p_ref = float(probs[2:].sum())
+            calibrated_referable = bool(p_ref >= 0.40)
         
         q_counts, detected_lesions, fovea_pt = self._extract_real_lesions_and_quadrants(prep_img.pre_ben_graham_512)
         
@@ -216,9 +211,12 @@ class NetramPipeline:
         else:
             conf_score = float(p_ref * 100.0)
 
-        if final_grade != raw_pred:
-            self.model.zero_grad()
-            score_final = logits[0, final_grade]
+        # 2. Optional Explanation (Grad-CAM)
+        # We only run the expensive backward pass ONCE for the final grade
+        self.model.zero_grad()
+        with torch.enable_grad():
+            logits_grad = self.model(tensor)
+            score_final = logits_grad[0, final_grade]
             score_final.backward()
             cam_heatmap = self.gradcam.compute_map_from_hooks()
             

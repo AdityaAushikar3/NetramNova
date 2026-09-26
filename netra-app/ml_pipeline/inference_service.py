@@ -29,6 +29,10 @@ from ml_pipeline.pipeline import NetramPipeline
 # Global pipeline instance
 PIPELINE = NetramPipeline()
 
+# Force models to load into memory immediately on boot (Fixes cold-start penalty)
+print("[NetramNova] Pre-warming models for fast inference...", file=sys.stderr)
+PIPELINE._ensure_model_loaded()
+
 def serialize_result(raw_result: dict) -> dict:
     import dataclasses
     import cv2

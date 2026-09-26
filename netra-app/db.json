@@ -7661,6 +7661,156 @@
           "safetyAuditPassed": true
         }
       }
+    },
+    "CASE-1790287092984-HAHB": {
+      "id": "CASE-1790287092984-HAHB",
+      "patient": {
+        "id": "PT-8842",
+        "name": "Lakshmi Bai",
+        "age": 58,
+        "sex": "Female",
+        "diabetesHistory": "Type 2 DM (11 years) • HbA1c 8.4%",
+        "cameraDevice": "Remidio NM-FOP",
+        "lastScreeningDate": "2025-03-12",
+        "phcLocation": "Telangana East PHC #04"
+      },
+      "timestamp": "2026-09-24T21:58:12.984Z",
+      "imageUrl": "/api/images/CASE-1790287092984-HAHB_original_1790287093118.png",
+      "status": "completed",
+      "quality": {
+        "blurScore": 0.04,
+        "exposureAcceptable": true,
+        "focusAcceptable": false,
+        "fovDetected": true,
+        "illuminationUniformity": 1,
+        "qualityTier": "AMBER",
+        "retinaVisible": true,
+        "route": "adaptive_enhancement",
+        "technicianFeedback": "BORDERLINE: Mild underexposure or peripheral shadow. Routing to Adaptive Ben Graham Illumination Standardization."
+      },
+      "qualityStatus": "passed",
+      "synced": false,
+      "doctorReviewStatus": "pending",
+      "result": {
+        "diagnosis": "Proliferative Diabetic Retinopathy",
+        "icdrLevel": 4,
+        "severity": "proliferative",
+        "confidence": "High",
+        "confidenceScore": 97.6,
+        "triageTier": "Tier 3 (Specialist Escalation)",
+        "findings": [
+          {
+            "category": "structural",
+            "coords": [
+              {
+                "radius": 0.75,
+                "x": 44.98,
+                "y": 13.67
+              },
+              {
+                "radius": 0.54,
+                "x": 45.35,
+                "y": 15.23
+              },
+              {
+                "radius": 0.54,
+                "x": 27.39,
+                "y": 19.73
+              },
+              {
+                "radius": 0.54,
+                "x": 48.72,
+                "y": 23.24
+              },
+              {
+                "radius": 0.54,
+                "x": 23.27,
+                "y": 24.22
+              },
+              {
+                "radius": 0.54,
+                "x": 21.21,
+                "y": 25.2
+              },
+              {
+                "radius": 0.54,
+                "x": 26.08,
+                "y": 25.39
+              },
+              {
+                "radius": 0.75,
+                "x": 36.18,
+                "y": 26.17
+              },
+              {
+                "radius": 0.91,
+                "x": 19.71,
+                "y": 31.25
+              },
+              {
+                "radius": 0.54,
+                "x": 21.96,
+                "y": 31.25
+              },
+              {
+                "radius": 0.54,
+                "x": 37.68,
+                "y": 31.64
+              },
+              {
+                "radius": 0.75,
+                "x": 21.96,
+                "y": 32.81
+              },
+              {
+                "radius": 2.03,
+                "x": 40.49,
+                "y": 37.89
+              },
+              {
+                "radius": 0.54,
+                "x": 21.02,
+                "y": 34.57
+              },
+              {
+                "radius": 0.54,
+                "x": 22.71,
+                "y": 34.77
+              },
+              {
+                "radius": 0.54,
+                "x": 15.97,
+                "y": 36.33
+              }
+            ],
+            "count": 16,
+            "id": "f-dark-blob-severe",
+            "locationDescription": "Severe unclassified lesions (16 detected) with high risk of neovascularization",
+            "name": "Dark Lesion Candidate (unclassified)",
+            "severity": "severe"
+          }
+        ],
+        "recallAdvice": "3 Months (Urgent)",
+        "gradcamOverlay": "/api/images/CASE-1790287092984-HAHB_gradcam_1790287093125.jpg",
+        "preprocessedImage": "/api/images/CASE-1790287092984-HAHB_preprocessed_1790287093123.jpg",
+        "probabilities": {
+          "Mild Non-Proliferative Diabetic Retinopathy": 0.1,
+          "Moderate Non-Proliferative Diabetic Retinopathy": 0,
+          "No Apparent Diabetic Retinopathy": 0,
+          "Proliferative Diabetic Retinopathy": 97.6,
+          "Severe Non-Proliferative Diabetic Retinopathy": 2.3
+        },
+        "rescuedBy": null,
+        "clinicalGuidance": {
+          "doctorTechnicalNote": "Diagnosis: Proliferative Diabetic Retinopathy (PDR). AAO PPP Section 5.1 & ICO Protocol: High-risk PDR is a sight-threatening ophthalmic emergency. Immediate referral within 24 to 48 hours for urgent intervention. Primary treatment consists of prompt Panretinal Photocoagulation (PRP) and/or intravitreal anti-VEGF injections (e.g., Aflibercept / Ranibizumab). If dense non-clearing vitreous hemorrhage or tractional detachment is present, urgent pars plana vitrectomy is indicated.",
+          "guidelineSource": "AAO Preferred Practice Pattern (PPP 2023) & AIIMS Guidelines",
+          "icd10Code": "E11.359",
+          "patientSummaryEn": "Sight-threatening emergency: Fragile abnormal new blood vessels have grown inside your eye and pose an immediate risk of severe bleeding and permanent blindness. Go to the nearest eye hospital or district medical college within 24 to 48 hours for emergency laser or injection treatment.",
+          "patientSummaryHi": "आपातकालीन स्थिति (अति गंभीर): आपकी आँख में नाजुक नई नसें उग आई हैं, जिनके फटने से आँख के भीतर भारी ब्लीडिंग और हमेशा के लिए अंधापन आने का खतरा है। तुरंत (24 से 48 घंटे के भीतर) नजदीकी मेडिकल कॉलेज या आँख के बड़े अस्पताल जाएं और आपातकालीन लेजर या इंजेक्शन का इलाज करवाएं।",
+          "referralTimeline": "Emergent hospital referral within 24 to 48 hours",
+          "safetyAuditPassed": true
+        }
+      }
     }
   },
   "patients": {
